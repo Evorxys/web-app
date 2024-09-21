@@ -8,12 +8,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const printBtn = document.getElementById('print-btn');
     const socket = io('https://web-app-backend-service.onrender.com');  // Initialize socket connection
 
-    socket.on('connect', () => {
-        console.log('Connected to the socket server');
-        // Identify as a teacher
-        socket.emit('identify', 'teacher');
-
-        // Register the message listener after connection is confirmed
+    function setupListeners() {
+        console.log('Setting up listeners for teacher...');
         socket.on('studentMessage', function(message) {
             console.log('Received message from student:', message);  // Debug log
             const newMessage = document.createElement('p');
@@ -21,11 +17,24 @@ document.addEventListener('DOMContentLoaded', function() {
             newMessage.innerHTML = `<span style="color:blue;"><strong>Student:</strong></span> ${message}`;
             chatbox.appendChild(newMessage);
         });
-        console.log('Listening for student messages...');
+    }
+
+    socket.on('connect', () => {
+        console.log('Connected to the socket server as teacher');
+        socket.emit('identify', 'teacher');
+        setupListeners();  // Register the listener once connected
     });
 
     socket.on('disconnect', () => {
-        console.log('Disconnected from the socket server');
+        console.log('Disconnected from the socket server. Retrying...');
+        setTimeout(() => {
+            socket.connect(); // Attempt to reconnect
+        }, 1000);  // Retry after 1 second
+    });
+
+    socket.on('reconnect', () => {
+        console.log('Reconnected to the server');
+        setupListeners();  // Re-register listeners after reconnect
     });
 
     let recognition;
