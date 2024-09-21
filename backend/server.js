@@ -45,6 +45,8 @@ io.on('connection', (socket) => {
       students.push(socket);
       console.log(`Student connected: ${socket.id}`);
     }
+    console.log(`Current teachers: ${teachers.map(t => t.id)}`);
+    console.log(`Current students: ${students.map(s => s.id)}`);
   });
 
   // Handle messages from Teacher
