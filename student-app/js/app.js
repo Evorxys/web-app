@@ -43,73 +43,65 @@ function interpretGesture(predictions) {
 
     // Example: If the hand is in a certain position, return a predefined message.
     if (fingerCount === 21) {
-        return "Detected a full hand gesture!";
+        return 'Detected a full hand gesture!'; // Example gesture detection logic
     }
-
-    return null; // No gesture recognized
+    return null;
 }
 
-// Toggle camera and load model only once when camera is opened
-toggleCameraBtn.addEventListener('click', () => {
-    if (!cameraOpen) {
-        openCamera();  // Open camera
-        loadModel();   // Load the HandPose model when the camera opens
+// Start the camera
+async function startCamera() {
+    stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    cameraFeed.srcObject = stream;
+    cameraOpen = true;
+    if (!model) {
+        await loadModel();  // Load the model if not already loaded
     } else {
-        closeCamera(); // Close camera
-    }
-});
-
-// Open the camera and stream video feed
-function openCamera() {
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        navigator.mediaDevices.getUserMedia({ video: true })
-            .then(function (streamObj) {
-                stream = streamObj;
-                cameraFeed.srcObject = stream;
-                toggleCameraBtn.innerText = "Close Camera";
-                cameraOpen = true;
-            })
-            .catch(function (error) {
-                console.log("Error accessing camera: ", error);
-            });
-    } else {
-        alert("Camera not supported in this browser.");
+        detectHands();  // Start detecting hands
     }
 }
 
-// Close the camera feed
-function closeCamera() {
+// Stop the camera
+function stopCamera() {
     if (stream) {
-        stream.getTracks().forEach(track => track.stop());
-        cameraFeed.srcObject = null;
+        const tracks = stream.getTracks();
+        tracks.forEach(track => track.stop()); // Stop all tracks to turn off the camera
     }
-    toggleCameraBtn.innerText = "Open Camera";
+    cameraFeed.srcObject = null;
     cameraOpen = false;
 }
 
-// Handle sending messages from the message box
-sendMessageBtn.addEventListener('click', () => {
-    const message = messageInput.value;
-    if (message.trim() === "") return;
-
-    // Send the message to the server using Socket.IO
-    socket.emit('studentMessage', message);
-
-    // Add the student's message to the chatbox
-    appendMessage('student', message);
-    messageInput.value = ""; // Clear message input
+// Toggle the camera on and off
+toggleCameraBtn.addEventListener('click', async () => {
+    if (cameraOpen) {
+        stopCamera();
+        toggleCameraBtn.textContent = 'Open Camera';
+    } else {
+        await startCamera();
+        toggleCameraBtn.textContent = 'Close Camera';
+    }
 });
 
-// Append messages to the chatbox
-function appendMessage(sender, message) {
-    const messageElement = document.createElement('p');
-    messageElement.classList.add(sender);
-    messageElement.innerText = `${sender.charAt(0).toUpperCase() + sender.slice(1)}: ${message}`;
-    chatbox.appendChild(messageElement);
-    chatbox.scrollTop = chatbox.scrollHeight; // Scroll to the bottom of the chatbox
-}
+// Send message event
+sendMessageBtn.addEventListener('click', () => {
+    const message = messageInput.value.trim();
 
-// Listen for incoming messages from the teacher
-socket.on('teacherMessage', (message) => {
-    appendMessage('teacher', message);
+    if (message) {
+        const newMessage = document.createElement('p');
+        newMessage.classList.add('chat-message');
+        newMessage.innerHTML = `<span style="color:blue;"><strong>Student:</strong></span> ${message}`;
+        chatbox.appendChild(newMessage);
+
+        // Emit message to the teacher
+        socket.emit('studentMessage', message);
+
+        messageInput.value = '';  // Clear the input field after sending
+    }
+});
+
+// Receive teacher's messages
+socket.on('teacherMessage', function(message) {
+    const newMessage = document.createElement('p');
+    newMessage.classList.add('chat-message');
+    newMessage.innerHTML = `<span style="color:green;"><strong>Teacher:</strong></span> ${message}`;
+    chatbox.appendChild(newMessage);
 });
