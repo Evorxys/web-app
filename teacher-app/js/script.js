@@ -90,6 +90,7 @@ document.addEventListener('DOMContentLoaded', function() {
         newMessage.innerHTML = `<span style="color:blue;"><strong>Student:</strong></span> ${message}`;
         chatbox.appendChild(newMessage);
     });
+    console.log('Listening for student messages...');
 
     // Speech recognition setup
     if ('webkitSpeechRecognition' in window) {
