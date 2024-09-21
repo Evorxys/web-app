@@ -28,27 +28,49 @@ app.use(cors({
   credentials: true
 }));
 
+// Keep track of connected teachers and students
+let teachers = [];
+let students = [];
+
 // Handle socket connections
 io.on('connection', (socket) => {
   console.log('A user connected:', socket.id);
 
+  // Handle identifying whether a user is a teacher or student
+  socket.on('identify', (role) => {
+    if (role === 'teacher') {
+      teachers.push(socket);
+      console.log(`Teacher connected: ${socket.id}`);
+    } else if (role === 'student') {
+      students.push(socket);
+      console.log(`Student connected: ${socket.id}`);
+    }
+  });
+
   // Handle messages from Teacher
   socket.on('teacherMessage', (message) => {
     console.log(`Teacher message: ${message}`);
-    // Broadcast the message to all connected clients, including the student
-    io.emit('studentMessage', message);  // Use io.emit to send to everyone
+    // Send the message to all students only
+    students.forEach(student => {
+      student.emit('studentMessage', message);
+    });
   });
 
   // Handle messages from Student
   socket.on('studentMessage', (message) => {
     console.log(`Student message: ${message}`);
-    // Broadcast the message to all connected clients, including the teacher
-    io.emit('teacherMessage', message);  // Use io.emit to send to everyone
+    // Send the message to all teachers only
+    teachers.forEach(teacher => {
+      teacher.emit('teacherMessage', message);
+    });
   });
 
   // Handle disconnection
   socket.on('disconnect', () => {
     console.log('A user disconnected:', socket.id);
+    // Remove disconnected teachers and students from their respective lists
+    teachers = teachers.filter(t => t.id !== socket.id);
+    students = students.filter(s => s.id !== socket.id);
   });
 });
 
