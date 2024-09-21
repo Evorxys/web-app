@@ -7,9 +7,20 @@ const messageInput = document.getElementById('messageInput');
 const sendMessageBtn = document.getElementById('sendMessageBtn');
 const chatbox = document.getElementById('chatbox');
 
+// Ensure the connection is established before registering listeners
 socket.on('connect', () => {
     console.log('Connected to the socket server');
     socket.emit('identify', 'student');
+
+    // Register the message listener after connection is confirmed
+    socket.on('teacherMessage', function(message) {
+        console.log('Received message from teacher:', message);  // Debug log
+        const newMessage = document.createElement('p');
+        newMessage.classList.add('chat-message');
+        newMessage.innerHTML = `<span style="color:green;"><strong>Teacher:</strong></span> ${message}`;
+        chatbox.appendChild(newMessage);
+    });
+    console.log('Listening for teacher messages...');
 });
 
 socket.on('disconnect', () => {
@@ -97,12 +108,3 @@ sendMessageBtn.addEventListener('click', () => {
         messageInput.value = '';  // Clear the input field after sending
     }
 });
-
-socket.on('teacherMessage', function(message) {
-    console.log('Received message from teacher:', message);  // Debug log
-    const newMessage = document.createElement('p');
-    newMessage.classList.add('chat-message');
-    newMessage.innerHTML = `<span style="color:green;"><strong>Teacher:</strong></span> ${message}`;
-    chatbox.appendChild(newMessage);
-});
-console.log('Listening for teacher messages...');
