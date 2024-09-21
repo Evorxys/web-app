@@ -8,6 +8,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const printBtn = document.getElementById('print-btn');
     const socket = io('https://web-app-backend-service.onrender.com');  // Initialize socket connection
 
+    // Socket connection check
+    socket.on('connect', () => {
+        console.log('Connected to the socket server');
+    });
+
+    socket.on('disconnect', () => {
+        console.log('Disconnected from the socket server');
+    });
+    
     let recognition;
     let recognizing = false;
     let interimSpeech = '';  // Interim recognized speech
@@ -26,6 +35,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Emit message to the student
             socket.emit('teacherMessage', message);
+            console.log('Message sent to socket:', message);  // Debug log
 
             messageBox.value = '';  // Clear the message box
             finalSpeech = '';  // Reset final speech after sending
@@ -70,6 +80,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Receive student messages
     socket.on('studentMessage', function(message) {
+        console.log('Received message from student:', message);  // Debug log
         console.log('Received message from student:', message);  // Debug log
         const newMessage = document.createElement('p');
         newMessage.classList.add('chat-message');
