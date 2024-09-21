@@ -50,8 +50,10 @@ io.on('connection', (socket) => {
   // Handle messages from Teacher
   socket.on('teacherMessage', (message) => {
     console.log(`Teacher message: ${message}`);
+    console.log('Broadcasting message to students...');
     // Send the message to all students only
     students.forEach(student => {
+      console.log(`Sending message to student: ${student.id}`);
       student.emit('studentMessage', message);
     });
   });
@@ -59,8 +61,10 @@ io.on('connection', (socket) => {
   // Handle messages from Student
   socket.on('studentMessage', (message) => {
     console.log(`Student message: ${message}`);
+    console.log('Broadcasting message to teachers...');
     // Send the message to all teachers only
     teachers.forEach(teacher => {
+      console.log(`Sending message to teacher: ${teacher.id}`);
       teacher.emit('teacherMessage', message);
     });
   });
