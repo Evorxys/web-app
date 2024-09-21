@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Function to send a message
     function sendMessage() {
         const message = messageBox.value.trim();
+        console.log('Sending message:', message);  // Debug log
         
         if (message) {
             const newMessage = document.createElement('p');
@@ -69,6 +70,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Receive student messages
     socket.on('studentMessage', function(message) {
+        console.log('Received message from student:', message);  // Debug log
         const newMessage = document.createElement('p');
         newMessage.classList.add('chat-message');
         newMessage.innerHTML = `<span style="color:blue;"><strong>Student:</strong></span> ${message}`;
