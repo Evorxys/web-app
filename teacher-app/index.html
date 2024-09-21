@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Interface</title>
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+</head>
+<body class="container">
+    <div class="glass-container">
+        <div>
+            <h1>Teacher Communication Interface</h1>
+
+            <!-- Chatbox -->
+            <div id="chatbox"></div>
+
+            <!-- Messagebox and Buttons -->
+            <div id="messagebox-container">
+                <textarea id="messagebox" placeholder="Type your message here"></textarea>
+            </div>
+
+            <div>
+                <!-- Send Button -->
+                <button id="send-btn">Send</button>
+                
+                <!-- Clear Messagebox Button -->
+                <button id="clear-btn">Clear</button>
+            </div>
+
+            <!-- Save and Print Buttons -->
+            <button id="save-btn">Save Messages</button>
+            <button id="print-btn">Print Messages</button>
+
+            <div>
+                <!-- Speak Button -->
+                <button id="speak-btn">Start Speaking</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="js/script.js"></script>
+</body>
+</html>

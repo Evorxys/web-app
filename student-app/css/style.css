@@ -1,0 +1,70 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f4f4f4;
+}
+
+.container {
+    width: 80%;
+    max-width: 800px;
+    padding: 20px;
+    background-color: white;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.camera-panel {
+    margin-bottom: 20px;
+}
+
+.message-box {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.message-box input {
+    width: 75%;
+    padding: 10px;
+    font-size: 1rem;
+}
+
+.message-box button {
+    width: 20%;
+    padding: 10px;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.chatbox {
+    border: 1px solid #ddd;
+    padding: 10px;
+    height: 300px;
+    overflow-y: scroll;
+    background-color: #f9f9f9;
+}
+
+#chatbox p {
+    text-align: left;
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
+#chatbox p.student {
+    background-color: #e1f5fe;
+}
+
+#chatbox p.teacher {
+    background-color: #dcedc8;
+    text-align: right;
+}

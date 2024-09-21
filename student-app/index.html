@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Interface</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.0.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/handpose"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Student Interface</h1>
+        
+        <!-- Camera Panel -->
+        <div id="cameraPanel" class="camera-panel">
+            <button id="toggleCameraBtn">Open Camera</button>
+            <video id="cameraFeed" width="640" height="480" autoplay></video>
+        </div>
+
+        <!-- Message Box -->
+        <div class="message-box">
+            <input type="text" id="messageInput" placeholder="Type a message or use hand gesture...">
+            <button id="sendMessageBtn">Send</button>
+        </div>
+
+        <!-- Chatbox -->
+        <div id="chatbox" class="chatbox">
+            <!-- Messages will be dynamically added here -->
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
