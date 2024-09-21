@@ -105,3 +105,4 @@ socket.on('teacherMessage', function(message) {
     newMessage.innerHTML = `<span style="color:green;"><strong>Teacher:</strong></span> ${message}`;
     chatbox.appendChild(newMessage);
 });
+console.log('Listening for teacher messages...');
