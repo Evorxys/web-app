@@ -34,6 +34,12 @@ document.addEventListener('DOMContentLoaded', function() {
             newMessage.innerHTML = `<span style="color:green;"><strong>Teacher:</strong></span> ${message}`;
             chatbox.appendChild(newMessage);
 
+            // In the teacher script, test receiving a student message manually:
+            setTimeout(() => {
+                socket.emit('studentMessage', 'Test message from student');
+            }, 3000);  // Simulate after 3 seconds
+
+
             // Emit message to the student
             socket.emit('teacherMessage', message);
             console.log('Message sent to socket:', message);  // Debug log
