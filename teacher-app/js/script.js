@@ -8,9 +8,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const printBtn = document.getElementById('print-btn');
     const socket = io('https://web-app-backend-service.onrender.com');  // Initialize socket connection
 
-    // Socket connection check
     socket.on('connect', () => {
-        console.log('Connected to the socket server');
+      console.log('Connected to the socket server');
+      // Identify as a teacher
+      socket.emit('identify', 'teacher');
     });
 
     socket.on('disconnect', () => {
