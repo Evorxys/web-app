@@ -9,15 +9,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const socket = io('https://web-app-backend-service.onrender.com');  // Initialize socket connection
 
     socket.on('connect', () => {
-      console.log('Connected to the socket server');
-      // Identify as a teacher
-      socket.emit('identify', 'teacher');
+        console.log('Connected to the socket server');
+        // Identify as a teacher
+        socket.emit('identify', 'teacher');
     });
 
     socket.on('disconnect', () => {
         console.log('Disconnected from the socket server');
     });
-    
+
     let recognition;
     let recognizing = false;
     let interimSpeech = '';  // Interim recognized speech
@@ -26,28 +26,25 @@ document.addEventListener('DOMContentLoaded', function() {
     // Function to send a message
     function sendMessage() {
         const message = messageBox.value.trim();
-        console.log('Sending message:', message);  // Debug log
-        
-        if (message) {
-            const newMessage = document.createElement('p');
-            newMessage.classList.add('chat-message');
-            newMessage.innerHTML = `<span style="color:green;"><strong>Teacher:</strong></span> ${message}`;
-            chatbox.appendChild(newMessage);
-
-            // In the teacher script, test receiving a student message manually:
-            setTimeout(() => {
-                socket.emit('studentMessage', 'Test message from student');
-            }, 3000);  // Simulate after 3 seconds
-
-
-            // Emit message to the student
-            socket.emit('teacherMessage', message);
-            console.log('Message sent to socket:', message);  // Debug log
-
-            messageBox.value = '';  // Clear the message box
-            finalSpeech = '';  // Reset final speech after sending
-            clearTypingMessage();  // Clear the typing message
+        if (!message) {
+            console.warn("No message to send."); // Avoid sending empty messages
+            return;
         }
+
+        console.log('Sending message:', message);  // Debug log
+
+        const newMessage = document.createElement('p');
+        newMessage.classList.add('chat-message');
+        newMessage.innerHTML = `<span style="color:green;"><strong>Teacher:</strong></span> ${message}`;
+        chatbox.appendChild(newMessage);
+
+        // Emit message to the student
+        socket.emit('teacherMessage', message);
+        console.log('Message sent to socket:', message);  // Debug log
+
+        messageBox.value = '';  // Clear the message box
+        finalSpeech = '';  // Reset final speech after sending
+        clearTypingMessage();  // Clear the typing message
     }
 
     // Function to clear the message box
@@ -87,7 +84,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Receive student messages
     socket.on('studentMessage', function(message) {
-        console.log('Received message from student:', message);  // Debug log
         console.log('Received message from student:', message);  // Debug log
         const newMessage = document.createElement('p');
         newMessage.classList.add('chat-message');
