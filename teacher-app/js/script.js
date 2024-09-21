@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const clearBtn = document.getElementById('clear-btn');
     const saveBtn = document.getElementById('save-btn');
     const printBtn = document.getElementById('print-btn');
-    const socket = io();  // Initialize socket connection
+    const socket = io('https://web-app-backend-service.onrender.com');  // Initialize socket connection
 
     let recognition;
     let recognizing = false;
