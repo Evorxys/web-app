@@ -1,4 +1,4 @@
-const socket = io();  // Connect to the server using Socket.IO
+const socket = io('https://web-app-backend-service.onrender.com');  // Connect to the server using Socket.IO
 
 // Elements
 const toggleCameraBtn = document.getElementById('toggleCameraBtn');
