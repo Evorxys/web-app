@@ -7,9 +7,10 @@ const messageInput = document.getElementById('messageInput');
 const sendMessageBtn = document.getElementById('sendMessageBtn');
 const chatbox = document.getElementById('chatbox');
 
-// Socket connection check
 socket.on('connect', () => {
-    console.log('Connected to the socket server');
+  console.log('Connected to the socket server');
+  // Identify as a student
+  socket.emit('identify', 'student');
 });
 
 socket.on('disconnect', () => {
