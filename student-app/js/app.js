@@ -7,6 +7,15 @@ const messageInput = document.getElementById('messageInput');
 const sendMessageBtn = document.getElementById('sendMessageBtn');
 const chatbox = document.getElementById('chatbox');
 
+// Socket connection check
+socket.on('connect', () => {
+    console.log('Connected to the socket server');
+});
+
+socket.on('disconnect', () => {
+    console.log('Disconnected from the socket server');
+});
+
 let cameraOpen = false;
 let stream = null;
 let model = null;  // Ensure model is initialized only once
@@ -84,6 +93,7 @@ toggleCameraBtn.addEventListener('click', async () => {
 // Send message event
 sendMessageBtn.addEventListener('click', () => {
     const message = messageInput.value.trim();
+    console.log('Sending message:', message);  // Debug log
 
     if (message) {
         const newMessage = document.createElement('p');
@@ -93,6 +103,7 @@ sendMessageBtn.addEventListener('click', () => {
 
         // Emit message to the teacher
         socket.emit('studentMessage', message);
+        console.log('Message sent to socket:', message);  // Debug log
 
         messageInput.value = '';  // Clear the input field after sending
     }
@@ -100,6 +111,7 @@ sendMessageBtn.addEventListener('click', () => {
 
 // Receive teacher's messages
 socket.on('teacherMessage', function(message) {
+    console.log('Received message from teacher:', message);  // Debug log
     const newMessage = document.createElement('p');
     newMessage.classList.add('chat-message');
     newMessage.innerHTML = `<span style="color:green;"><strong>Teacher:</strong></span> ${message}`;
