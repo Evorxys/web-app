@@ -102,6 +102,12 @@ sendMessageBtn.addEventListener('click', () => {
         newMessage.innerHTML = `<span style="color:blue;"><strong>Student:</strong></span> ${message}`;
         chatbox.appendChild(newMessage);
 
+      // In the teacher script, test receiving a student message manually:
+        setTimeout(() => {
+            socket.emit('studentMessage', 'Test message from student');
+        }, 3000);  // Simulate after 3 seconds
+
+      
         // Emit message to the teacher
         socket.emit('studentMessage', message);
         console.log('Message sent to socket:', message);  // Debug log
