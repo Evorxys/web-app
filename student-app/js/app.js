@@ -55,68 +55,55 @@ async function detectHands() {
     const predictions = await model.estimateHands(cameraFeed);
 
     if (predictions.length > 0) {
-        const gesture = interpretGesture(predictions);
-        if (gesture) {
-            messageInput.value = gesture;
+        console.log(predictions);
+        const fullHandDetected = predictions.some(prediction => prediction.landmarks.length === 21);
+
+        if (fullHandDetected) {
+            messageInput.value = 'Detected a full hand gesture!';
+        } else {
+            messageInput.value = 'No hand gesture detected!';
         }
+    } else {
+        messageInput.value = 'No hand gesture detected!';
     }
 
     requestAnimationFrame(detectHands);
 }
 
-function interpretGesture(predictions) {
-    const hand = predictions[0];
-    const fingerCount = hand.landmarks.length;
-
-    if (fingerCount === 21) {
-        return 'Detected a full hand gesture!'; // Example gesture detection logic
-    }
-    return null;
-}
-
-async function startCamera() {
-    stream = await navigator.mediaDevices.getUserMedia({ video: true });
-    cameraFeed.srcObject = stream;
-    cameraOpen = true;
-    if (!model) {
-        await loadModel();
-    } else {
-        detectHands();
-    }
-}
-
-function stopCamera() {
-    if (stream) {
-        const tracks = stream.getTracks();
-        tracks.forEach(track => track.stop());
-    }
-    cameraFeed.srcObject = null;
-    cameraOpen = false;
-}
-
-toggleCameraBtn.addEventListener('click', async () => {
-    if (cameraOpen) {
-        stopCamera();
-        toggleCameraBtn.textContent = 'Open Camera';
-    } else {
-        await startCamera();
-        toggleCameraBtn.textContent = 'Close Camera';
-    }
-});
-
-sendMessageBtn.addEventListener('click', () => {
+function sendMessage() {
     const message = messageInput.value.trim();
+    if (!message) return;
+
     console.log('Sending message:', message);  // Debug log
 
-    if (message) {
-        const newMessage = document.createElement('p');
-        newMessage.classList.add('chat-message');
-        newMessage.innerHTML = `<span style="color:blue;"><strong>Student:</strong></span> ${message}`;
-        chatbox.appendChild(newMessage);
+    const newMessage = document.createElement('p');
+    newMessage.classList.add('chat-message');
+    newMessage.innerHTML = `<span style="color:blue;"><strong>Student:</strong></span> ${message}`;
+    chatbox.appendChild(newMessage);
 
-        socket.emit('studentMessage', message);
-        console.log('Message sent to socket:', message);  // Debug log
+    socket.emit('studentMessage', message);  // Send message via Socket.IO
+    console.log('Message sent to socket:', message);  // Debug log
 
-        messageInput.value = '';  // Clear the input field after sending
+    messageInput.value = '';  // Clear the input box
+}
+
+async function toggleCamera() {
+    if (cameraOpen) {
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());  // Stop all tracks of the stream
+            cameraFeed.srcObject = null;
+        }
+        cameraOpen = false;
+        toggleCameraBtn.textContent = 'Open Camera';
+    } else {
+        stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        cameraFeed.srcObject = stream;
+        cameraOpen = true;
+        toggleCameraBtn.textContent = 'Close Camera';
+        await loadModel();  // Load the model and start detection
     }
-});
+}
+
+// Event listeners
+toggleCameraBtn.addEventListener('click', toggleCamera);
+sendMessageBtn.addEventListener('click', sendMessage);
