@@ -8,11 +8,9 @@ const sendMessageBtn = document.getElementById('sendMessageBtn');
 const chatbox = document.getElementById('chatbox');
 
 // Ensure the connection is established before registering listeners
-socket.on('connect', () => {
-    console.log('Connected to the socket server');
-    socket.emit('identify', 'student');
-
-    // Register the message listener after connection is confirmed
+function setupListeners() {
+    console.log('Setting up listeners for student...');
+    
     socket.on('teacherMessage', function(message) {
         console.log('Received message from teacher:', message);  // Debug log
         const newMessage = document.createElement('p');
@@ -20,11 +18,25 @@ socket.on('connect', () => {
         newMessage.innerHTML = `<span style="color:green;"><strong>Teacher:</strong></span> ${message}`;
         chatbox.appendChild(newMessage);
     });
-    console.log('Listening for teacher messages...');
+}
+
+socket.on('connect', () => {
+    console.log('Connected to the socket server as student');
+    socket.emit('identify', 'student');
+    setupListeners(); // Register the listener once connected
 });
 
 socket.on('disconnect', () => {
-    console.log('Disconnected from the socket server');
+    console.log('Disconnected from the socket server. Retrying...');
+    setTimeout(() => {
+        socket.connect(); // Attempt to reconnect
+    }, 1000);  // Retry after 1 second
+});
+
+// Retry setting up listeners when reconnecting
+socket.on('reconnect', () => {
+    console.log('Reconnected to the server');
+    setupListeners();  // Re-register listeners after reconnect
 });
 
 let cameraOpen = false;
