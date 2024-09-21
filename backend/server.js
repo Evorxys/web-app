@@ -1,62 +1,43 @@
 const express = require('express');
 const http = require('http');
-const { Server } = require('socket.io');
-const cors = require('cors');  // Required to handle cross-origin requests
+const socketIO = require('socket.io');
+const cors = require('cors');
 
 const app = express();
 const server = http.createServer(app);
-
-// Setup Socket.IO and allow cross-origin requests for your two static web apps
-const io = new Server(server, {
-  cors: {
-    origin: [
-      'https://web-app-for-student.onrender.com', // Student app URL
-      'https://web-app-for-teacher.onrender.com'  // Teacher app URL
-    ],
-    methods: ['GET', 'POST'],
-    credentials: true
-  }
+const io = socketIO(server, {
+    cors: {
+        origin: ["https://teacher-app.onrender.com", "https://student-app.onrender.com"],  // Add both URLs
+        methods: ["GET", "POST"]
+    }
 });
 
-// Middleware to use CORS globally in the app
-app.use(cors({
-  origin: [
-    'https://web-app-for-student.onrender.com',
-    'https://web-app-for-teacher.onrender.com'
-  ],
-  methods: ['GET', 'POST'],
-  credentials: true
-}));
-
-// Handle socket connections
+// Socket.IO connection handling
 io.on('connection', (socket) => {
-  console.log('A user connected');
+    console.log('A user connected:', socket.id);
 
-  // Handle messages from Teacher
-  socket.on('teacherMessage', (message) => {
-    console.log(`Teacher message: ${message}`);
-    // Broadcast the message to all students
-    socket.broadcast.emit('studentMessage', message);
-  });
+    // Listen for messages from the teacher
+    socket.on('teacherMessage', (message) => {
+        console.log('Received teacherMessage:', message);
+        // Broadcast to all students
+        socket.broadcast.emit('teacherMessage', message);
+    });
 
-  // Handle messages from Student
-  socket.on('studentMessage', (message) => {
-    console.log(`Student message: ${message}`);
-    // Broadcast the message to all teachers
-    socket.broadcast.emit('teacherMessage', message);
-  });
+    // Listen for messages from the student
+    socket.on('studentMessage', (message) => {
+        console.log('Received studentMessage:', message);
+        // Broadcast to all teachers
+        socket.broadcast.emit('studentMessage', message);
+    });
 
-  // Handle disconnection
-  socket.on('disconnect', () => {
-    console.log('A user disconnected');
-  });
+    // Handle disconnect
+    socket.on('disconnect', () => {
+        console.log('User disconnected:', socket.id);
+    });
 });
 
-// Serve the static files from the 'public' folder if needed (this is optional)
-app.use(express.static('public'));
-
-// Start server listening on port 3000
+// Start server
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-  console.log(`Listening on port ${PORT}`);
+    console.log(`Server is running on port ${PORT}`);
 });
