@@ -47,6 +47,14 @@ h1:hover {
 
 /* Chatbox styles */
 #chatbox {
+    font-size: 25px;
+    font-family:'Times New Roman', Times, serif;
+    resize: both; /* Allow resizing in both directions */
+    overflow: auto; /* Add scrollbars when the content overflows */
+    min-height: 100px; /* Set a minimum height */
+    min-width: 300px;  /* Set a minimum width */
+    max-width: 1200px;
+    max-height: 500px;
     width: 100%;
     margin: 10px 0;
     padding: 10px;
@@ -74,6 +82,9 @@ h1:hover {
 }
 
 #messagebox {
+    font-size: 20px;
+    padding: 10px;    /* Optional: to add padding for better readability */
+    font-family: Arial, Helvetica, sans-serif;
     width: 100%;
     padding: 10px;
     border-radius: 10px;
