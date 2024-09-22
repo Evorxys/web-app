@@ -1,150 +1,210 @@
-document.addEventListener('DOMContentLoaded', function() {
-    const messageBox = document.getElementById('messagebox');
-    const chatbox = document.getElementById('chatbox');
-    const sendBtn = document.getElementById('send-btn');
-    const speakBtn = document.getElementById('speak-btn');
-    const clearBtn = document.getElementById('clear-btn');
-    const saveBtn = document.getElementById('save-btn');
-    const printBtn = document.getElementById('print-btn');
-    const socket = io('https://web-app-backend-service.onrender.com');  // Initialize socket connection
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Chat</title>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+</head>
+<body>
+    <div id="chatbox"></div>
+    <textarea id="messagebox" placeholder="Type your message here..."></textarea>
+    <button id="send-btn">Send</button>
+    <button id="speak-btn">Start Speaking</button>
+    <button id="clear-btn">Clear</button>
+    <button id="save-btn">Save Messages</button>
+    <button id="print-btn">Print Messages</button>
 
-    function setupListeners() {
-        console.log('Setting up listeners for teacher...');
-        socket.on('studentMessage', function(message) {
-            console.log('Received message from student:', message);  // Debug log
-            const newMessage = document.createElement('p');
-            newMessage.classList.add('chat-message');
-            newMessage.innerHTML = `<span style="color:blue;"><strong>Student:</strong></span> ${message}`;
-            chatbox.appendChild(newMessage);
-        });
-    }
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const messageBox = document.getElementById('messagebox');
+            const chatbox = document.getElementById('chatbox');
+            const sendBtn = document.getElementById('send-btn');
+            const speakBtn = document.getElementById('speak-btn');
+            const clearBtn = document.getElementById('clear-btn');
+            const saveBtn = document.getElementById('save-btn');
+            const printBtn = document.getElementById('print-btn');
+            const socket = io('https://web-app-backend-service.onrender.com');  // Initialize socket connection
 
-    socket.on('connect', () => {
-        console.log('Connected to the socket server as teacher');
-        socket.emit('identify', 'teacher');
-        setupListeners();  // Register the listener once connected
-    });
+            let recognition;
+            let recognizing = false;
+            let interimSpeech = '';
+            let finalSpeech = '';
 
-    socket.on('disconnect', () => {
-        console.log('Disconnected from the socket server. Retrying...');
-        setTimeout(() => {
-            socket.connect(); // Attempt to reconnect
-        }, 1000);  // Retry after 1 second
-    });
-
-    socket.on('reconnect', () => {
-        console.log('Reconnected to the server');
-        setupListeners();  // Re-register listeners after reconnect
-    });
-
-    function sendMessage() {
-        const message = messageBox.value.trim();
-        if (!message) {
-            console.warn("No message to send."); // Avoid sending empty messages
-            return;
-        }
-
-        console.log('Sending message:', message);  // Debug log
-
-        const newMessage = document.createElement('p');
-        newMessage.classList.add('chat-message');
-        newMessage.innerHTML = `<span style="color:green;"><strong>Teacher:</strong></span> ${message}`;
-        chatbox.appendChild(newMessage);
-
-        // Emit message to the student
-        socket.emit('teacherMessage', message);
-        console.log('Message sent to socket:', message);  // Debug log
-
-        messageBox.value = '';  // Clear the message box
-        clearTypingMessage();  // Clear the typing message
-    }
-
-    function clearMessageBox() {
-        messageBox.value = '';
-        clearTypingMessage();  // Clear the typing message
-    }
-
-    function clearTypingMessage() {
-        const typingMessage = document.getElementById('typing-message');
-        if (typingMessage) {
-            chatbox.removeChild(typingMessage);
-        }
-    }
-
-    // This function updates the "typing" message in the chatbox in real-time
-    function updateTypingMessage() {
-        const typingMessage = document.getElementById('typing-message');
-        const message = messageBox.value.trim();
-
-        if (message) {
-            if (!typingMessage) {
-                const newTypingMessage = document.createElement('p');
-                newTypingMessage.id = 'typing-message';
-                newTypingMessage.classList.add('chat-message');
-                newTypingMessage.innerHTML = `<span style="color:orange;"><strong>Teacher (Typing):</strong></span> ${message}`;
-                chatbox.appendChild(newTypingMessage);
-            } else {
-                typingMessage.innerHTML = `<span style="color:orange;"><strong>Teacher (Typing):</strong></span> ${message}`;
-            }
-        } else {
-            clearTypingMessage();  // Clear typing message if input is empty
-        }
-    }
-
-    // Listen for real-time input changes in the messageBox
-    messageBox.addEventListener('input', updateTypingMessage);
-
-    // Event listeners for sending messages and managing the chat interface
-    sendBtn.addEventListener('click', sendMessage);
-    clearBtn.addEventListener('click', clearMessageBox);
-    saveBtn.addEventListener('click', saveMessages);
-    printBtn.addEventListener('click', printMessages);
-
-    // MutationObserver implementation for the chatbox to detect new messages added by other users
-    const observer = new MutationObserver((mutationList, observer) => {
-        mutationList.forEach(mutation => {
-            if (mutation.addedNodes.length > 0) {
-                mutation.addedNodes.forEach(node => {
-                    if (node.nodeName === 'P') {
-                        console.log('New message detected in chatbox:', node.innerText);
-                        // Perform any additional action when a new message is added to the chatbox
-                    }
+            // Set up socket listeners
+            function setupListeners() {
+                socket.on('studentMessage', function(message) {
+                    const newMessage = document.createElement('p');
+                    newMessage.classList.add('chat-message');
+                    newMessage.innerHTML = `<span style="color:blue;"><strong>Student:</strong></span> ${message}`;
+                    chatbox.appendChild(newMessage);
                 });
             }
-        });
-    });
 
-    // Start observing the chatbox for changes (new messages)
-    observer.observe(chatbox, { childList: true });
+            socket.on('connect', () => {
+                socket.emit('identify', 'teacher');
+                setupListeners();
+            });
 
-    // Save chat messages as a text file
-    function saveMessages() {
-        let teacherMessages = '';
-        chatbox.querySelectorAll('p').forEach(message => {
-            if (message.innerText.includes('Teacher:')) {
-                teacherMessages += message.innerText.replace('Teacher:', '') + '\n';
+            socket.on('disconnect', () => {
+                setTimeout(() => {
+                    socket.connect();
+                }, 1000);
+            });
+
+            socket.on('reconnect', () => {
+                setupListeners();
+            });
+
+            // Function to send a message
+            function sendMessage() {
+                const message = messageBox.value.trim();
+                if (!message) return;
+
+                const newMessage = document.createElement('p');
+                newMessage.classList.add('chat-message');
+                newMessage.innerHTML = `<span style="color:green;"><strong>Teacher:</strong></span> ${message}`;
+                chatbox.appendChild(newMessage);
+
+                socket.emit('teacherMessage', message);
+
+                messageBox.value = '';
+                finalSpeech = '';
+                clearTypingMessage();
             }
+
+            // Function to clear typing message
+            function clearTypingMessage() {
+                const typingMessage = document.getElementById('typing-message');
+                if (typingMessage) {
+                    chatbox.removeChild(typingMessage);
+                }
+            }
+
+            // Update typing message
+            function updateTypingMessage() {
+                const typingMessage = document.getElementById('typing-message');
+                const message = messageBox.value.trim();
+
+                if (message) {
+                    if (!typingMessage) {
+                        const newTypingMessage = document.createElement('p');
+                        newTypingMessage.id = 'typing-message';
+                        newTypingMessage.classList.add('chat-message');
+                        newTypingMessage.innerHTML = `<span style="color:orange;"><strong>Teacher (Typing):</strong></span> ${message}`;
+                        chatbox.appendChild(newTypingMessage);
+                    } else {
+                        typingMessage.innerHTML = `<span style="color:orange;"><strong>Teacher (Typing):</strong></span> ${message}`;
+                    }
+                } else {
+                    clearTypingMessage();
+                }
+            }
+
+            // Speech recognition setup
+            if ('webkitSpeechRecognition' in window) {
+                recognition = new webkitSpeechRecognition();
+                recognition.continuous = true;
+                recognition.interimResults = true;
+                recognition.lang = 'en-US';
+
+                recognition.onstart = function() {
+                    recognizing = true;
+                    speakBtn.textContent = 'Stop Speaking';
+                };
+
+                recognition.onresult = function(event) {
+                    interimSpeech = '';
+
+                    for (let i = event.resultIndex; i < event.results.length; ++i) {
+                        if (event.results[i].isFinal) {
+                            finalSpeech += event.results[i][0].transcript.trim() + ' ';
+                        } else {
+                            interimSpeech += event.results[i][0].transcript.trim() + ' ';
+                        }
+                    }
+
+                    displayRealTimeMessage(finalSpeech + interimSpeech);
+                };
+
+                recognition.onerror = function(event) {
+                    console.error('Speech recognition error: ', event.error);
+                };
+
+                recognition.onend = function() {
+                    recognizing = false;
+                    speakBtn.textContent = 'Start Speaking';
+                    messageBox.value = finalSpeech.trim();
+                    sendMessage();
+                };
+            } else {
+                alert('Speech Recognition API not supported in this browser.');
+            }
+
+            // Function to toggle speech recognition
+            function toggleSpeechRecognition() {
+                if (recognizing) {
+                    recognition.stop();
+                } else {
+                    recognition.start();
+                }
+            }
+
+            // Display real-time speech in chatbox
+            function displayRealTimeMessage(text) {
+                let realTimeMessageElement = document.getElementById('real-time-message');
+                if (!realTimeMessageElement) {
+                    realTimeMessageElement = document.createElement('p');
+                    realTimeMessageElement.id = 'real-time-message';
+                    realTimeMessageElement.classList.add('chat-message');
+                    realTimeMessageElement.innerHTML = `<span style="color:green;"><strong>Teacher (Speaking):</strong></span> ${text}`;
+                    chatbox.appendChild(realTimeMessageElement);
+                } else {
+                    realTimeMessageElement.innerHTML = `<span style="color:green;"><strong>Teacher (Speaking):</strong></span> ${text}`;
+                }
+            }
+
+            // Save messages to a file
+            function saveMessages() {
+                let teacherMessages = '';
+                chatbox.querySelectorAll('p').forEach(message => {
+                    if (message.innerText.includes('Teacher:')) {
+                        teacherMessages += message.innerText.replace('Teacher:', '') + '\n';
+                    }
+                });
+
+                const blob = new Blob([teacherMessages], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'teacher_messages.txt';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            }
+
+            // Print messages
+            function printMessages() {
+                const newWindow = window.open('', '_blank');
+                newWindow.document.write('<html><head><title>Messages</title></head><body>');
+                newWindow.document.write(chatbox.innerHTML);
+                newWindow.document.write('</body></html>');
+                newWindow.document.close();
+                newWindow.focus();
+                newWindow.print();
+                newWindow.close();
+            }
+
+            // Event listeners
+            sendBtn.addEventListener('click', sendMessage);
+            speakBtn.addEventListener('click', toggleSpeechRecognition);
+            clearBtn.addEventListener('click', clearMessageBox);
+            saveBtn.addEventListener('click', saveMessages);
+            printBtn.addEventListener('click', printMessages);
+            messageBox.addEventListener('input', updateTypingMessage);
+
         });
-
-        const blob = new Blob([teacherMessages], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'teacher_messages.txt';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-    }
-
-    // Print chat messages
-    function printMessages() {
-        const newWindow = window.open('', '_blank');
-        newWindow.document.write('<html><head><title>Messages</title></head><body>');
-        newWindow.document.write(chatbox.innerHTML);
-        newWindow.document.write('</body></html>');
-        newWindow.document.close();
-        newWindow.focus();
-        newWindow.print();
-        newWindow.close();
-    }
-});
+    </script>
+</body>
+</html>
