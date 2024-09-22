@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', function() {
     const messageBox = document.getElementById('messagebox');
     const chatbox = document.getElementById('chatbox');
     const sendBtn = document.getElementById('send-btn');
@@ -6,16 +6,13 @@ document.addEventListener('DOMContentLoaded', function () {
     const clearBtn = document.getElementById('clear-btn');
     const saveBtn = document.getElementById('save-btn');
     const printBtn = document.getElementById('print-btn');
-    const socket = io('https://web-app-backend-service.onrender.com'); // Initialize socket connection
+    const socket = io('https://web-app-backend-service.onrender.com');  // Initialize socket connection
 
-    let recognition;
-    let recognizing = false;
-    let interimSpeech = '';
-    let finalSpeech = '';
-
-    // Set up socket listeners
+    // Function to set up listeners for incoming messages from the student
     function setupListeners() {
-        socket.on('studentMessage', function (message) {
+        console.log('Setting up listeners for teacher...');
+        socket.on('studentMessage', function(message) {
+            console.log('Received message from student:', message);  // Debug log
             const newMessage = document.createElement('p');
             newMessage.classList.add('chat-message');
             newMessage.innerHTML = `<span style="color:blue;"><strong>Student:</strong></span> ${message}`;
@@ -23,39 +20,55 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // Socket connection and reconnection logic
     socket.on('connect', () => {
+        console.log('Connected to the socket server as teacher');
         socket.emit('identify', 'teacher');
-        setupListeners();
+        setupListeners();  // Register the listener once connected
     });
 
     socket.on('disconnect', () => {
+        console.log('Disconnected from the socket server. Retrying...');
         setTimeout(() => {
-            socket.connect();
-        }, 1000);
+            socket.connect(); // Attempt to reconnect
+        }, 1000);  // Retry after 1 second
     });
 
     socket.on('reconnect', () => {
-        setupListeners();
+        console.log('Reconnected to the server');
+        setupListeners();  // Re-register listeners after reconnect
     });
 
-    // Function to send a message
+    // Function to handle sending the teacher's message
     function sendMessage() {
         const message = messageBox.value.trim();
-        if (!message) return;
+        if (!message) {
+            console.warn("No message to send.");  // Avoid sending empty messages
+            return;
+        }
+
+        console.log('Sending message:', message);  // Debug log
 
         const newMessage = document.createElement('p');
         newMessage.classList.add('chat-message');
         newMessage.innerHTML = `<span style="color:green;"><strong>Teacher:</strong></span> ${message}`;
         chatbox.appendChild(newMessage);
 
+        // Emit message to the student
         socket.emit('teacherMessage', message);
+        console.log('Message sent to socket:', message);  // Debug log
 
-        messageBox.value = '';
-        finalSpeech = '';
-        clearTypingMessage();
+        messageBox.value = '';  // Clear the message box after sending
+        clearTypingMessage();  // Clear the typing message
     }
 
-    // Function to clear typing message
+    // Function to clear the message box content
+    function clearMessageBox() {
+        messageBox.value = '';
+        clearTypingMessage();  // Clear the typing message
+    }
+
+    // Function to clear the typing message
     function clearTypingMessage() {
         const typingMessage = document.getElementById('typing-message');
         if (typingMessage) {
@@ -63,7 +76,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Update typing message
+    // Function to update the typing message in real-time as the teacher types
     function updateTypingMessage() {
         const typingMessage = document.getElementById('typing-message');
         const message = messageBox.value.trim();
@@ -79,96 +92,37 @@ document.addEventListener('DOMContentLoaded', function () {
                 typingMessage.innerHTML = `<span style="color:orange;"><strong>Teacher (Typing):</strong></span> ${message}`;
             }
         } else {
-            clearTypingMessage();
+            clearTypingMessage();  // Clear typing message if input is empty
         }
     }
 
-    // Request microphone access and start speech recognition
-    function requestMicrophoneAccess() {
-        navigator.mediaDevices.getUserMedia({ audio: true })
-            .then(function (stream) {
-                console.log("Microphone access granted.");
-                startSpeechRecognition(); // Start speech recognition after access is granted
-            })
-            .catch(function (err) {
-                console.error("Microphone access denied: " + err);
-                alert('Please allow microphone access to use speech recognition.');
-            });
-    }
+    // Listen for real-time input changes in the messageBox
+    messageBox.addEventListener('input', updateTypingMessage);
 
-    // Speech recognition setup
-    if ('webkitSpeechRecognition' in window) {
-        recognition = new webkitSpeechRecognition();
-        recognition.continuous = true;
-        recognition.interimResults = true;
-        recognition.lang = 'en-US';
+    // Event listeners for sending messages and managing the chat interface
+    sendBtn.addEventListener('click', sendMessage);
+    clearBtn.addEventListener('click', clearMessageBox);
+    saveBtn.addEventListener('click', saveMessages);
+    printBtn.addEventListener('click', printMessages);
 
-        recognition.onstart = function () {
-            recognizing = true;
-            speakBtn.textContent = 'Stop Speaking';
-        };
-
-        recognition.onresult = function (event) {
-            interimSpeech = '';
-
-            for (let i = event.resultIndex; i < event.results.length; ++i) {
-                if (event.results[i].isFinal) {
-                    finalSpeech += event.results[i][0].transcript.trim() + ' ';
-                } else {
-                    interimSpeech += event.results[i][0].transcript.trim() + ' ';
-                }
+    // MutationObserver to observe the chatbox for new messages
+    const observer = new MutationObserver((mutationList, observer) => {
+        mutationList.forEach(mutation => {
+            if (mutation.addedNodes.length > 0) {
+                mutation.addedNodes.forEach(node => {
+                    if (node.nodeName === 'P') {
+                        console.log('New message detected in chatbox:', node.innerText);
+                        // You can add further actions when new messages are detected here
+                    }
+                });
             }
+        });
+    });
 
-            displayRealTimeMessage(finalSpeech + interimSpeech);
-        };
+    // Start observing the chatbox for new message nodes
+    observer.observe(chatbox, { childList: true });
 
-        recognition.onerror = function (event) {
-            console.error('Speech recognition error: ', event.error);
-        };
-
-        recognition.onend = function () {
-            recognizing = false;
-            speakBtn.textContent = 'Start Speaking';
-            messageBox.value = finalSpeech.trim();
-            sendMessage();
-        };
-    } else {
-        alert('Speech Recognition API not supported in this browser.');
-    }
-
-    // Function to start speech recognition
-    function startSpeechRecognition() {
-        if (recognizing) {
-            recognition.stop();
-        } else {
-            recognition.start();
-        }
-    }
-
-    // Function to toggle speech recognition (with microphone request)
-    function toggleSpeechRecognition() {
-        if (recognizing) {
-            recognition.stop();
-        } else {
-            requestMicrophoneAccess();  // Request microphone access first
-        }
-    }
-
-    // Display real-time speech in chatbox
-    function displayRealTimeMessage(text) {
-        let realTimeMessageElement = document.getElementById('real-time-message');
-        if (!realTimeMessageElement) {
-            realTimeMessageElement = document.createElement('p');
-            realTimeMessageElement.id = 'real-time-message';
-            realTimeMessageElement.classList.add('chat-message');
-            realTimeMessageElement.innerHTML = `<span style="color:green;"><strong>Teacher (Speaking):</strong></span> ${text}`;
-            chatbox.appendChild(realTimeMessageElement);
-        } else {
-            realTimeMessageElement.innerHTML = `<span style="color:green;"><strong>Teacher (Speaking):</strong></span> ${text}`;
-        }
-    }
-
-    // Save messages to a file
+    // Save messages to a text file
     function saveMessages() {
         let teacherMessages = '';
         chatbox.querySelectorAll('p').forEach(message => {
@@ -187,7 +141,7 @@ document.addEventListener('DOMContentLoaded', function () {
         document.body.removeChild(a);
     }
 
-    // Print messages
+    // Print messages in the chatbox
     function printMessages() {
         const newWindow = window.open('', '_blank');
         newWindow.document.write('<html><head><title>Messages</title></head><body>');
@@ -198,13 +152,4 @@ document.addEventListener('DOMContentLoaded', function () {
         newWindow.print();
         newWindow.close();
     }
-
-    // Event listeners
-    sendBtn.addEventListener('click', sendMessage);
-    speakBtn.addEventListener('click', toggleSpeechRecognition);
-    clearBtn.addEventListener('click', () => messageBox.value = '');
-    saveBtn.addEventListener('click', saveMessages);
-    printBtn.addEventListener('click', printMessages);
-    messageBox.addEventListener('input', updateTypingMessage);
-
 });
