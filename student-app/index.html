@@ -8,14 +8,17 @@
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.0.0"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/handpose"></script>
 </head>
-<body>
-    <div class="container">
+<body class="container">
+    <div class="glass-container">
         <h1>Student Interface</h1>
-        
+
         <!-- Camera Panel -->
         <div id="cameraPanel" class="camera-panel">
+            <video id="cameraFeed" width="640" height="480" autoplay playsinline muted></video>
+        </div>
+
+        <div>
             <button id="toggleCameraBtn">Open Camera</button>
-            <video id="cameraFeed" width="640" height="480" autoplay></video>
         </div>
 
         <!-- Message Box -->
