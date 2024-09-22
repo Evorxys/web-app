@@ -6,7 +6,7 @@
     background-position: center center;
     background-attachment: fixed;
     width: 100%;
-    height: 100vh; /* Full viewport height */
+    height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -22,7 +22,7 @@
     border-radius: 10px;
     padding: 20px;
     width: 100%;
-    max-width: 700px; /* Limit max size */
+    max-width: 700px;
     height: auto;
     z-index: 2;
     display: flex;
@@ -32,7 +32,6 @@
     text-align: center;
 }
 
-/* Responsive font size for heading */
 h1 {
     color: #392e18;
     text-align: center;
@@ -45,7 +44,7 @@ h1 {
 #chatbox {
     font-size: 1.5em;
     font-family: 'Times New Roman', Times, serif;
-    resize: both;
+    resize: none; /* Remove resizing for mobile stability */
     overflow: auto;
     min-height: 100px;
     min-width: 100%;
@@ -59,6 +58,7 @@ h1 {
     border: 2px solid #697300;
     box-sizing: border-box;
     transition: transform 0.3s, background-color 0.3s;
+    word-wrap: break-word; /* Ensure long text wraps */
 }
 
 #chatbox:hover {
@@ -84,8 +84,10 @@ h1 {
     border: 2px solid #ccc;
     box-sizing: border-box;
     margin-bottom: 10px;
+    overflow-wrap: break-word; /* Prevent overflow for long words */
 }
 
+/* Button styling */
 #send-btn, #clear-btn, #save-btn, #print-btn, #speak-btn {
     width: 100%;
     max-width: 180px;
@@ -101,6 +103,29 @@ h1 {
 
 #send-btn, #clear-btn, #save-btn, #print-btn, #speak-btn:hover {
     transform: scale(1.03);
+}
+
+#speak-btn {
+    color: #697300;
+    font-weight: bold;
+    font-size: 30px;
+    font-family: 'Times New Roman', Times, serif;
+    width: 100%;
+    max-width: 320px;
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 10px;
+    background-color: #dbcb55;
+    border: 5px solid #5c6400;
+    cursor: pointer;
+    text-align: center;
+    transition: transform 0.3s, background-color 0.3s;
+}
+
+#speak-btn:hover {
+    background-color: rgb(151, 133, 0);
+    color: white;
+    transform: scale(1.2); /* Visual modification retained */
 }
 
 /* Chat message styling */
@@ -129,6 +154,17 @@ h1 {
 
     h1 {
         font-size: 2em;
+    }
+
+    #messagebox {
+        max-width: 100%;
+        width: 100%; /* Fix for messagebox expanding on mobile */
+        white-space: normal; /* Ensure long text wraps */
+    }
+
+    #chatbox {
+        white-space: pre-wrap;
+        overflow-wrap: break-word;
     }
 }
 
