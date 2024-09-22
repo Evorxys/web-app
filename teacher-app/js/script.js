@@ -37,11 +37,6 @@ document.addEventListener('DOMContentLoaded', function() {
         setupListeners();  // Re-register listeners after reconnect
     });
 
-    let recognition;
-    let recognizing = false;
-    let interimSpeech = '';  // Interim recognized speech
-    let finalSpeech = '';    // Final recognized speech
-
     function sendMessage() {
         const message = messageBox.value.trim();
         if (!message) {
@@ -61,13 +56,11 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Message sent to socket:', message);  // Debug log
 
         messageBox.value = '';  // Clear the message box
-        finalSpeech = '';  // Reset final speech after sending
         clearTypingMessage();  // Clear the typing message
     }
 
     function clearMessageBox() {
         messageBox.value = '';
-        finalSpeech = ''; // Clear the speech as well
         clearTypingMessage();  // Clear the typing message
     }
 
@@ -97,67 +90,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    if ('webkitSpeechRecognition' in window) {
-        recognition = new webkitSpeechRecognition();
-        recognition.continuous = true;  
-        recognition.interimResults = true;
-        recognition.lang = 'en-US';
+    // Add event listener to the message box to track typing in real-time
+    messageBox.addEventListener('input', updateTypingMessage);
 
-        recognition.onstart = function() {
-            recognizing = true;
-            speakBtn.textContent = 'Stop Speaking';
-        };
-
-        recognition.onresult = function(event) {
-            interimSpeech = ''; // Clear interim speech for this round
-
-            for (let i = event.resultIndex; i < event.results.length; ++i) {
-                if (event.results[i].isFinal) {
-                    finalSpeech += event.results[i][0].transcript.trim() + ' ';
-                } else {
-                    interimSpeech += event.results[i][0].transcript.trim() + ' ';
-                }
-            }
-
-            displayRealTimeMessage(finalSpeech + interimSpeech);
-        };
-
-        recognition.onerror = function(event) {
-            console.error('Speech recognition error: ', event.error);
-        };
-
-        recognition.onend = function() {
-            recognizing = false;
-            speakBtn.textContent = 'Start Speaking';
-            messageBox.value = finalSpeech.trim(); 
-            sendMessage();  // Simulate sending the message
-        };
-    } else {
-        alert('Speech Recognition API not supported in this browser.');
-    }
-
-    function toggleSpeechRecognition() {
-        if (recognizing) {
-            recognition.stop();  
-        } else {
-            recognition.start();  
-        }
-    }
-
-    function displayRealTimeMessage(text) {
-        let realTimeMessageElement = document.getElementById('real-time-message');
-        
-        if (!realTimeMessageElement) {
-            realTimeMessageElement = document.createElement('p');
-            realTimeMessageElement.id = 'real-time-message';
-            realTimeMessageElement.classList.add('chat-message');
-            realTimeMessageElement.innerHTML = `<span style="color:green;"><strong>Teacher (Speaking):</strong></span> ${text}`;
-            chatbox.appendChild(realTimeMessageElement);
-        } else {
-            realTimeMessageElement.innerHTML = `<span style="color:green;"><strong>Teacher (Speaking):</strong></span> ${text}`;
-        }
-    }
-
+    // Event listeners for other buttons
+    sendBtn.addEventListener('click', sendMessage);
+    clearBtn.addEventListener('click', clearMessageBox);
+    
+    // Function to save teacher messages
     function saveMessages() {
         let teacherMessages = '';
         chatbox.querySelectorAll('p').forEach(message => {
@@ -176,6 +116,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.body.removeChild(a);
     }
 
+    // Function to print messages
     function printMessages() {
         const newWindow = window.open('', '_blank');
         newWindow.document.write('<html><head><title>Messages</title></head><body>');
@@ -187,28 +128,24 @@ document.addEventListener('DOMContentLoaded', function() {
         newWindow.close();
     }
 
-    sendBtn.addEventListener('click', sendMessage);
-    messageBox.addEventListener('input', updateTypingMessage);
-    clearBtn.addEventListener('click', clearMessageBox);
-    speakBtn.addEventListener('click', toggleSpeechRecognition);
+    // Attach event listeners to save and print buttons
     saveBtn.addEventListener('click', saveMessages);
     printBtn.addEventListener('click', printMessages);
 
-    // MutationObserver implementation for the chatbox
-    const observer = new MutationObserver((mutationList, observer) => {
+    // MutationObserver for monitoring new messages added to the chatbox
+    const observer = new MutationObserver((mutationList) => {
         mutationList.forEach(mutation => {
             if (mutation.addedNodes.length > 0) {
                 mutation.addedNodes.forEach(node => {
                     if (node.nodeName === 'P') {
                         console.log('New message detected in chatbox:', node.innerText);
-                        // Perform any additional action when a new message is added to the chatbox
+                        // You can handle further actions when new messages are added
                     }
                 });
             }
         });
     });
 
-    // Start observing the chatbox for changes (new messages)
+    // Start observing the chatbox for changes
     observer.observe(chatbox, { childList: true });
-
 });
