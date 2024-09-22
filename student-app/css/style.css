@@ -1,9 +1,4 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
+/* General body styling */
 body {
     font-family: Arial, sans-serif;
     display: flex;
@@ -11,46 +6,128 @@ body {
     align-items: center;
     height: 100vh;
     background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    background-image: url("https://static.vecteezy.com/system/resources/previews/011/189/962/original/abstract-wall-decor-design-with-hand-drawn-leaf-pattern-aesthetic-background-free-vector.jpg");
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
 }
 
-.container {
-    width: 80%;
-    max-width: 800px;
+/* Responsive glass effect container */
+.glass-container {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
     padding: 20px;
-    background-color: white;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    width: 90%; /* Adjust width for smaller screens */
+    max-width: 700px; /* Limit max size */
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     text-align: center;
 }
 
+/* Title styling with backdrop filter for visibility */
+h1 {
+    color: #003334;
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 2rem;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(10px);
+    max-width: 500px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: color 0.3s, transform 0.3s;
+}
+
+h1:hover {
+    color: #80e5ff;
+    transform: scale(1.05);
+}
+
+/* Camera panel styling */
 .camera-panel {
     margin-bottom: 20px;
 }
 
+#cameraFeed {
+    width: 100%;
+    max-width: 500px;
+    height: 200px; /* Adjusted height for better layout */
+    border-radius: 10px;
+    display: none; /* Initially hidden */
+}
+
+/* Static image overlay when camera is off */
+.static-image {
+    width: 100%;
+    max-width: 500px;
+    height: 200px; /* Match camera height */
+    border-radius: 10px;
+    display: block; /* Initially shown */
+}
+
+/* Message Box */
 .message-box {
     display: flex;
     justify-content: space-between;
     margin-bottom: 20px;
+    width: 100%;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.message-box:hover {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
 
 .message-box input {
-    width: 75%;
+    width: 70%;
     padding: 10px;
     font-size: 1rem;
+    border: 2px solid #5c6400;
+    border-radius: 5px;
+    background-color: #f9f4cc;
+    word-wrap: break-word; /* Enable text wrap for long messages */
+    transition: transform 0.3s;
 }
 
 .message-box button {
-    width: 20%;
+    width: 25%;
     padding: 10px;
     font-size: 1rem;
     cursor: pointer;
+    background-color: #697300;
+    border: 2px solid #003334; /* Contrasting border */
+    border-radius: 5px;
+    transition: all 0.3s, transform 0.3s;
+    color: azure;
 }
 
+.message-box button:hover {
+    background-color: #ffaa00;
+    transform: scale(1.05);
+}
+
+/* Chatbox styling with hover scale animation */
 .chatbox {
-    border: 1px solid #ddd;
+    border: 2px solid #5c6400;
     padding: 10px;
+    width: 100%;
     height: 300px;
-    overflow-y: scroll;
-    background-color: #f9f9f9;
+    overflow-y: auto;
+    background-color: lightyellow;
+    border-radius: 5px;
+    transition: transform 0.3s;
+}
+
+.chatbox:hover {
+    transform: scale(1.02);
 }
 
 #chatbox p {
@@ -58,13 +135,96 @@ body {
     padding: 10px;
     border-radius: 10px;
     margin-bottom: 10px;
+    overflow-wrap: break-word; /* Wrap text for long messages */
 }
 
 #chatbox p.student {
     background-color: #e1f5fe;
+    color: #003334; /* Label color for student */
 }
 
 #chatbox p.teacher {
     background-color: #dcedc8;
+    color: #004d00; /* Label color for teacher */
     text-align: right;
+}
+
+#chatbox p.teacher::before {
+    content: "Teacher: ";
+    color: green; /* Green label for teacher */
+    font-weight: bold;
+    text-align: right;
+}
+
+/* Toggle camera button styling */
+#toggleCameraBtn {
+    width: 100%;
+    max-width: 180px;
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: larger;
+    text-align: center;
+    background-color: #dbcb55;
+    transition: transform 0.3s, background-color 0.3s;
+    border: 2px solid #003334; /* Contrasting border */
+}
+
+#toggleCameraBtn:hover {
+    transform: scale(1.05);
+    background-color: #ffaa00;
+}
+
+/* Media Queries for Responsiveness */
+@media (max-width: 768px) {
+    .glass-container {
+        padding: 15px;
+        max-width: 600px;
+    }
+
+    #cameraFeed, .static-image {
+        width: 100%;
+        height: auto;
+    }
+
+    h1 {
+        font-size: 1.5rem;
+    }
+
+    .message-box input {
+        width: 65%;
+    }
+
+    .message-box button {
+        width: 30%;
+    }
+}
+
+@media (max-width: 480px) {
+    .glass-container {
+        padding: 10px;
+        max-width: 400px;
+    }
+
+    #cameraFeed, .static-image {
+        width: 100%;
+        height: auto;
+    }
+
+    h1 {
+        font-size: 1.2rem;
+    }
+
+    .message-box input {
+        width: 60%;
+    }
+
+    .message-box button {
+        width: 35%;
+    }
+
+    .chatbox {
+        height: 200px;
+    }
 }
