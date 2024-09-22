@@ -83,6 +83,19 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // Request microphone access and start speech recognition
+    function requestMicrophoneAccess() {
+        navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(function (stream) {
+                console.log("Microphone access granted.");
+                startSpeechRecognition(); // Start speech recognition after access is granted
+            })
+            .catch(function (err) {
+                console.error("Microphone access denied: " + err);
+                alert('Please allow microphone access to use speech recognition.');
+            });
+    }
+
     // Speech recognition setup
     if ('webkitSpeechRecognition' in window) {
         recognition = new webkitSpeechRecognition();
@@ -123,12 +136,21 @@ document.addEventListener('DOMContentLoaded', function () {
         alert('Speech Recognition API not supported in this browser.');
     }
 
-    // Function to toggle speech recognition
-    function toggleSpeechRecognition() {
+    // Function to start speech recognition
+    function startSpeechRecognition() {
         if (recognizing) {
             recognition.stop();
         } else {
             recognition.start();
+        }
+    }
+
+    // Function to toggle speech recognition (with microphone request)
+    function toggleSpeechRecognition() {
+        if (recognizing) {
+            recognition.stop();
+        } else {
+            requestMicrophoneAccess();  // Request microphone access first
         }
     }
 
