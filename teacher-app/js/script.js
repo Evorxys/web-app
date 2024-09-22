@@ -6,69 +6,41 @@ document.addEventListener('DOMContentLoaded', function() {
     const clearBtn = document.getElementById('clear-btn');
     const saveBtn = document.getElementById('save-btn');
     const printBtn = document.getElementById('print-btn');
-    const socket = io('https://web-app-backend-service.onrender.com');  // Initialize socket connection
 
-    // Function to set up listeners for incoming messages from the student
-    function setupListeners() {
-        console.log('Setting up listeners for teacher...');
-        socket.on('studentMessage', function(message) {
-            console.log('Received message from student:', message);  // Debug log
-            const newMessage = document.createElement('p');
-            newMessage.classList.add('chat-message');
-            newMessage.innerHTML = `<span style="color:blue;"><strong>Student:</strong></span> ${message}`;
-            chatbox.appendChild(newMessage);
-        });
-    }
+    let recognition;
+    let recognizing = false;
+    let interimSpeech = '';  // Interim recognized speech
+    let finalSpeech = '';    // Final recognized speech
 
-    // Socket connection and reconnection logic
-    socket.on('connect', () => {
-        console.log('Connected to the socket server as teacher');
-        socket.emit('identify', 'teacher');
-        setupListeners();  // Register the listener once connected
-    });
-
-    socket.on('disconnect', () => {
-        console.log('Disconnected from the socket server. Retrying...');
-        setTimeout(() => {
-            socket.connect(); // Attempt to reconnect
-        }, 1000);  // Retry after 1 second
-    });
-
-    socket.on('reconnect', () => {
-        console.log('Reconnected to the server');
-        setupListeners();  // Re-register listeners after reconnect
-    });
-
-    // Function to handle sending the teacher's message
+    // Function to send a message
     function sendMessage() {
         const message = messageBox.value.trim();
-        if (!message) {
-            console.warn("No message to send.");  // Avoid sending empty messages
-            return;
+        
+        if (message) {
+            const newMessage = document.createElement('p');
+            newMessage.classList.add('chat-message');
+            newMessage.innerHTML = `<span style="color:blue;"><strong>Teacher:</strong></span> ${message}`;
+            chatbox.appendChild(newMessage);
+            messageBox.value = '';  
+            finalSpeech = '';  // Reset final speech after sending
+            clearTypingMessage();  // Clear the typing message
+            autoScrollChatbox();  // Auto-scroll to the bottom
         }
-
-        console.log('Sending message:', message);  // Debug log
-
-        const newMessage = document.createElement('p');
-        newMessage.classList.add('chat-message');
-        newMessage.innerHTML = `<span style="color:green;"><strong>Teacher:</strong></span> ${message}`;
-        chatbox.appendChild(newMessage);
-
-        // Emit message to the student
-        socket.emit('teacherMessage', message);
-        console.log('Message sent to socket:', message);  // Debug log
-
-        messageBox.value = '';  // Clear the message box after sending
-        clearTypingMessage();  // Clear the typing message
+    }
+    
+    // Auto-scroll chatbox to show the latest message
+    function autoScrollChatbox() {
+        chatbox.scrollTop = chatbox.scrollHeight;
     }
 
-    // Function to clear the message box content
+    // Function to clear the message box
     function clearMessageBox() {
         messageBox.value = '';
+        finalSpeech = ''; // Clear the speech as well
         clearTypingMessage();  // Clear the typing message
     }
 
-    // Function to clear the typing message
+    // Function to clear typing message from chatbox
     function clearTypingMessage() {
         const typingMessage = document.getElementById('typing-message');
         if (typingMessage) {
@@ -76,11 +48,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Function to update the typing message in real-time as the teacher types
+    // Function to update typing message
     function updateTypingMessage() {
         const typingMessage = document.getElementById('typing-message');
         const message = messageBox.value.trim();
-
+    
         if (message) {
             if (!typingMessage) {
                 const newTypingMessage = document.createElement('p');
@@ -91,65 +63,135 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 typingMessage.innerHTML = `<span style="color:orange;"><strong>Teacher (Typing):</strong></span> ${message}`;
             }
+            autoScrollChatbox();  // Auto-scroll to the bottom
         } else {
             clearTypingMessage();  // Clear typing message if input is empty
         }
     }
 
-    // Listen for real-time input changes in the messageBox
-    messageBox.addEventListener('input', updateTypingMessage);
+    // Speech recognition setup
+    if ('webkitSpeechRecognition' in window) {
+        recognition = new webkitSpeechRecognition();
+        recognition.continuous = true;  
+        recognition.interimResults = true;
+        recognition.lang = 'en-US';
 
-    // Event listeners for sending messages and managing the chat interface
-    sendBtn.addEventListener('click', sendMessage);
-    clearBtn.addEventListener('click', clearMessageBox);
-    saveBtn.addEventListener('click', saveMessages);
-    printBtn.addEventListener('click', printMessages);
+        recognition.onstart = function() {
+            recognizing = true;
+            speakBtn.textContent = 'Stop Speaking';
+        };
 
-    // MutationObserver to observe the chatbox for new messages
-    const observer = new MutationObserver((mutationList, observer) => {
-        mutationList.forEach(mutation => {
-            if (mutation.addedNodes.length > 0) {
-                mutation.addedNodes.forEach(node => {
-                    if (node.nodeName === 'P') {
-                        console.log('New message detected in chatbox:', node.innerText);
-                        // You can add further actions when new messages are detected here
-                    }
-                });
+        recognition.onresult = function(event) {
+            interimSpeech = ''; // Clear interim speech for this round
+
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+                if (event.results[i].isFinal) {
+                    finalSpeech += event.results[i][0].transcript.trim() + ' ';
+                } else {
+                    interimSpeech += event.results[i][0].transcript.trim() + ' ';
+                }
             }
-        });
-    });
 
-    // Start observing the chatbox for new message nodes
-    observer.observe(chatbox, { childList: true });
+            // Display real-time speech in chatbox
+            displayRealTimeMessage(finalSpeech + interimSpeech);
+        };
 
-    // Save messages to a text file
+        recognition.onerror = function(event) {
+            console.error('Speech recognition error: ', event.error);
+        };
+
+        recognition.onend = function() {
+            recognizing = false;
+            speakBtn.textContent = 'Start Speaking';
+
+            // On stop, copy final speech to messagebox and treat it as sent
+            messageBox.value = finalSpeech.trim(); // Set the final speech in message box
+            sendMessage();  // Simulate sending the message
+        };
+    } else {
+        alert('Speech Recognition API not supported in this browser.');
+    }
+
+    // Function to start/stop speech recognition
+    function toggleSpeechRecognition() {
+        if (recognizing) {
+            recognition.stop();  // Stop speech recognition and trigger sending the message
+        } else {
+            recognition.start();  // Start speech recognition
+        }
+    }
+
+    // Function to display teacher's real-time speech in chatbox
+    function displayRealTimeMessage(text) {
+        const previousRealTimeMessage = document.getElementById('real-time-message');
+
+        // Remove the previous "Teacher (talking)" message to make space for a new one
+        if (previousRealTimeMessage) {
+            chatbox.removeChild(previousRealTimeMessage);
+        }
+
+        const realTimeMessageElement = document.createElement('p');
+        realTimeMessageElement.id = 'real-time-message';
+        realTimeMessageElement.classList.add('chat-message');
+        realTimeMessageElement.innerHTML = `<span style="color:green;"><strong>Teacher (talking):</strong></span> ${text}`;
+        chatbox.appendChild(realTimeMessageElement);
+
+        autoScrollChatbox();  // Auto-scroll to the bottom
+    }
+    
+    // Save messages to a file
     function saveMessages() {
         let teacherMessages = '';
         chatbox.querySelectorAll('p').forEach(message => {
-            if (message.innerText.includes('Teacher:')) {
-                teacherMessages += message.innerText.replace('Teacher:', '') + '\n';
+            if (message.innerHTML.includes('<strong>Teacher:</strong>')) {
+                teacherMessages += message.innerText + '\n';
             }
         });
 
-        const blob = new Blob([teacherMessages], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'teacher_messages.txt';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+        if (teacherMessages.trim() === '') {
+            alert('No Teacher messages to save.');
+            return;
+        }
+
+        let fileName = prompt('Enter a name for your file:', 'TeacherMessages');
+        if (!fileName) {
+            alert('File name cannot be empty!');
+            return;
+        }
+
+        fileName = fileName.replace(/\.docx$/, '') + '.docx';
+        const docxContent = new Blob([teacherMessages], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+        saveAs(docxContent, fileName);
     }
 
-    // Print messages in the chatbox
+    // Print messages
     function printMessages() {
-        const newWindow = window.open('', '_blank');
-        newWindow.document.write('<html><head><title>Messages</title></head><body>');
-        newWindow.document.write(chatbox.innerHTML);
-        newWindow.document.write('</body></html>');
-        newWindow.document.close();
-        newWindow.focus();
-        newWindow.print();
-        newWindow.close();
+        let printContent = '';
+        chatbox.querySelectorAll('p').forEach(message => {
+            if (message.innerHTML.includes('<strong>Teacher:</strong>')) {
+                printContent += message.innerHTML + '<br>';
+            }
+        });
+
+        if (printContent) {
+            const printWindow = window.open('', '', 'height=400,width=600');
+            printWindow.document.write('<html><head><title>Print Teacher Messages</title></head><body>');
+            printWindow.document.write(printContent);
+            printWindow.document.write('</body></html>');
+            printWindow.document.close();
+            printWindow.print();
+        } else {
+            alert("No teacher messages to print.");
+        }
     }
+
+    // Event listeners
+    sendBtn.addEventListener('click', sendMessage);
+    speakBtn.addEventListener('click', toggleSpeechRecognition);
+    clearBtn.addEventListener('click', clearMessageBox);
+    saveBtn.addEventListener('click', saveMessages);
+    printBtn.addEventListener('click', printMessages);
+    
+    // Update chatbox with typing message
+    messageBox.addEventListener('input', updateTypingMessage);
 });
