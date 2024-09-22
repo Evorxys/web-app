@@ -1,109 +1,127 @@
-const socket = io('https://web-app-backend-service.onrender.com');  // Connect to the server using Socket.IO
+document.addEventListener('DOMContentLoaded', () => {
+    const socket = io();  // Connect to the server using Socket.IO
 
-// Elements
-const toggleCameraBtn = document.getElementById('toggleCameraBtn');
-const cameraFeed = document.getElementById('cameraFeed');
-const messageInput = document.getElementById('messageInput');
-const sendMessageBtn = document.getElementById('sendMessageBtn');
-const chatbox = document.getElementById('chatbox');
+    // Elements
+    const toggleCameraBtn = document.getElementById('toggleCameraBtn');
+    const cameraFeed = document.getElementById('cameraFeed');
+    const messageInput = document.getElementById('messageInput');
+    const sendMessageBtn = document.getElementById('sendMessageBtn');
+    const chatbox = document.getElementById('chatbox');
+    const staticImage = document.createElement('img');
+    staticImage.src = "https://static-00.iconduck.com/assets.00/camera-icon-512x454-qkhu7ta2.png";
+    staticImage.classList.add('static-image');
 
-// Ensure the connection is established before registering listeners
-function setupListeners() {
-    console.log('Setting up listeners for student...');
-    
-    socket.on('teacherMessage', function(message) {
-        console.log('Received message from teacher:', message);  // Debug log
-        const newMessage = document.createElement('p');
-        newMessage.classList.add('chat-message');
-        newMessage.innerHTML = `<span style="color:green;"><strong>Teacher:</strong></span> ${message}`;
-        chatbox.appendChild(newMessage);
-    });
-}
+    let cameraOpen = false;
+    let stream = null;
+    let model = null;  // Ensure model is initialized only once
 
-socket.on('connect', () => {
-    console.log('Connected to the socket server as student');
-    socket.emit('identify', 'student');
-    setupListeners(); // Register the listener once connected
-});
-
-socket.on('disconnect', () => {
-    console.log('Disconnected from the socket server. Retrying...');
-    setTimeout(() => {
-        socket.connect(); // Attempt to reconnect
-    }, 1000);  // Retry after 1 second
-});
-
-// Retry setting up listeners when reconnecting
-socket.on('reconnect', () => {
-    console.log('Reconnected to the server');
-    setupListeners();  // Re-register listeners after reconnect
-});
-
-let cameraOpen = false;
-let stream = null;
-let model = null;  // Ensure model is initialized only once
-
-async function loadModel() {
-    model = await handpose.load();
-    console.log("HandPose model loaded.");
-    detectHands(); // Start detecting once the model is loaded
-}
-
-async function detectHands() {
-    if (!cameraOpen || !model) return;
-
-    const predictions = await model.estimateHands(cameraFeed);
-
-    if (predictions.length > 0) {
-        console.log(predictions);
-        const fullHandDetected = predictions.some(prediction => prediction.landmarks.length === 21);
-
-        if (fullHandDetected) {
-            messageInput.value = 'Detected a full hand gesture!';
-        } else {
-            messageInput.value = 'No hand gesture detected!';
-        }
-    } else {
-        messageInput.value = 'No hand gesture detected!';
+    // Load the HandPose model
+    async function loadModel() {
+        model = await handpose.load();
+        console.log("HandPose model loaded.");
+        detectHands(); // Start detecting once the model is loaded
     }
 
-    requestAnimationFrame(detectHands);
-}
+    // Start detecting hand gestures
+    async function detectHands() {
+        if (!cameraOpen || !model) return; // Ensure camera is on and model is loaded
 
-function sendMessage() {
-    const message = messageInput.value.trim();
-    if (!message) return;
+        const predictions = await model.estimateHands(cameraFeed); // Detect hands
 
-    console.log('Sending message:', message);  // Debug log
+        if (predictions.length > 0) {
+            console.log("Hand detected", predictions);
+            const gesture = interpretGesture(predictions); // Interpret the detected gesture
+            if (gesture) {
+                messageInput.value = gesture; // Display the interpreted gesture
+            }
+        }
 
-    const newMessage = document.createElement('p');
-    newMessage.classList.add('chat-message');
-    newMessage.innerHTML = `<span style="color:blue;"><strong>Student:</strong></span> ${message}`;
-    chatbox.appendChild(newMessage);
+        // Call detectHands on the next animation frame for continuous detection
+        requestAnimationFrame(detectHands);
+    }
 
-    socket.emit('studentMessage', message);  // Send message via Socket.IO
-    console.log('Message sent to socket:', message);  // Debug log
+    // Interpret gestures based on predictions
+    function interpretGesture(predictions) {
+        const hand = predictions[0]; // Assuming there's at least one hand detected
+        const fingerCount = hand.landmarks.length;
 
-    messageInput.value = '';  // Clear the input box
-}
+        // Example: If the hand is in a certain position, return a predefined message.
+        if (fingerCount === 21) {
+            return "Detected a full hand gesture!";
+        }
 
-async function toggleCamera() {
-    if (cameraOpen) {
+        return null; // No gesture recognized
+    }
+
+    // Toggle camera and load model only once when camera is opened
+    toggleCameraBtn.addEventListener('click', () => {
+        if (!cameraOpen) {
+            openCamera();  // Open camera
+            loadModel();   // Load the HandPose model when the camera opens
+        } else {
+            closeCamera(); // Close camera
+        }
+    });
+
+    // Open the camera and stream video feed
+    function openCamera() {
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(function (streamObj) {
+                    stream = streamObj;
+                    cameraFeed.srcObject = stream;
+                    toggleCameraBtn.innerText = "Close Camera";
+                    cameraOpen = true;
+                    cameraFeed.style.display = 'block'; // Show camera feed
+                    staticImage.style.display = 'none'; // Hide static image
+                })
+                .catch(function (error) {
+                    console.log("Error accessing camera: ", error);
+                });
+        } else {
+            alert("Camera not supported in this browser.");
+        }
+    }
+
+    // Close the camera feed
+    function closeCamera() {
         if (stream) {
-            stream.getTracks().forEach(track => track.stop());  // Stop all tracks of the stream
+            stream.getTracks().forEach(track => track.stop());
             cameraFeed.srcObject = null;
         }
+        toggleCameraBtn.innerText = "Open Camera";
         cameraOpen = false;
-        toggleCameraBtn.textContent = 'Open Camera';
-    } else {
-        stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        cameraFeed.srcObject = stream;
-        cameraOpen = true;
-        toggleCameraBtn.textContent = 'Close Camera';
-        await loadModel();  // Load the model and start detection
+        cameraFeed.style.display = 'none'; // Hide camera feed
+        staticImage.style.display = 'block'; // Show static image
     }
-}
 
-// Event listeners
-toggleCameraBtn.addEventListener('click', toggleCamera);
-sendMessageBtn.addEventListener('click', sendMessage);
+    // Handle sending messages from the message box
+    sendMessageBtn.addEventListener('click', () => {
+        const message = messageInput.value;
+        if (message.trim() === "") return;
+
+        // Send the message to the server using Socket.IO
+        socket.emit('studentMessage', message);
+
+        // Add the student's message to the chatbox
+        appendMessage('student', message);
+        messageInput.value = ""; // Clear message input
+    });
+
+    // Append messages to the chatbox
+    function appendMessage(sender, message) {
+        const messageElement = document.createElement('p');
+        messageElement.classList.add(sender);
+        messageElement.innerText = `${sender.charAt(0).toUpperCase() + sender.slice(1)}: ${message}`;
+        chatbox.appendChild(messageElement);
+        chatbox.scrollTop = chatbox.scrollHeight; // Scroll to the bottom of the chatbox
+    }
+
+    // Listen for incoming messages from the teacher
+    socket.on('teacherMessage', (message) => {
+        appendMessage('teacher', message);
+    });
+
+    // Add the static image to the camera panel
+    document.getElementById('cameraPanel').appendChild(staticImage);
+});
