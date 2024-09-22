@@ -61,6 +61,7 @@ h1:hover {
     border-radius: 10px;
     background-color: lightyellow;
     overflow-y: auto;
+    scroll-behavior: smooth; /* Smooth scrolling effect */
     height: 150px;
     border: 10px solid #697300;
     box-sizing: border-box;
