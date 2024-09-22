@@ -10,7 +10,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 20px; /* Add some padding for better spacing */
+    padding: 20px;
     box-sizing: border-box;
 }
 
@@ -21,7 +21,7 @@
     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
     border-radius: 10px;
     padding: 20px;
-    width: 90%; /* Adjust width for smaller screens */
+    width: 100%;
     max-width: 700px; /* Limit max size */
     height: auto;
     z-index: 2;
@@ -29,41 +29,34 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    text-align: center; /* Ensure content stays centered */
+    text-align: center;
 }
 
+/* Responsive font size for heading */
 h1 {
     color: #392e18;
     text-align: center;
     backdrop-filter: blur(10px);
     transition: transform 0.3s, background-color 0.3s;
-
-}
-
-h1:hover {
-    color: #003334;
-    transform: scale(1.1);
+    font-size: 2.5em;
 }
 
 /* Chatbox styles */
 #chatbox {
-    font-size: 25px;
-    font-family:'Times New Roman', Times, serif;
-    resize: both; /* Allow resizing in both directions */
-    overflow: auto; /* Add scrollbars when the content overflows */
-    min-height: 100px; /* Set a minimum height */
-    min-width: 300px;  /* Set a minimum width */
-    max-width: 1200px;
-    max-height: 500px;
-    width: 100%;
+    font-size: 1.5em;
+    font-family: 'Times New Roman', Times, serif;
+    resize: both;
+    overflow: auto;
+    min-height: 100px;
+    min-width: 100%;
+    max-width: 100%;
     margin: 10px 0;
     padding: 10px;
     border-radius: 10px;
     background-color: lightyellow;
-    overflow-y: auto;
-    scroll-behavior: smooth; /* Smooth scrolling effect */
+    scroll-behavior: smooth;
     height: 150px;
-    border: 10px solid #697300;
+    border: 2px solid #697300;
     box-sizing: border-box;
     transition: transform 0.3s, background-color 0.3s;
 }
@@ -78,31 +71,24 @@ h1:hover {
     display: flex;
     flex-direction: column;
     align-items: center;
-    caret-color:sienna;
     transition: transform 0.3s, background-color 0.3s;
 }
 
 #messagebox {
-    font-size: 20px;
-    padding: 10px;    /* Optional: to add padding for better readability */
+    font-size: 1.2em;
+    padding: 10px;
     font-family: Arial, Helvetica, sans-serif;
     width: 100%;
-    padding: 10px;
     border-radius: 10px;
     background-color: aquamarine;
     border: 2px solid #ccc;
     box-sizing: border-box;
     margin-bottom: 10px;
-    
 }
 
-#messagebox-container:hover {
-    transform: scale(1.05);
-}
-
-#send-btn, #clear-btn, #save-btn, #print-btn {
+#send-btn, #clear-btn, #save-btn, #print-btn, #speak-btn {
     width: 100%;
-    max-width: 180px; /* Ensure buttons don't grow too large */
+    max-width: 180px;
     margin: 10px 0;
     padding: 10px;
     border-radius: 10px;
@@ -113,68 +99,7 @@ h1:hover {
     transition: transform 0.3s, background-color 0.3s;
 }
 
-#send-btn {
-    background-color: #f9f4cc;
-    border: 5px solid #5c6400;
-    color: #003334;
-    font-size: 25px;
-    font-weight: bold;
-    color: #697300;
-}
-
-#send-btn:hover {
-    background-color: rgb(0, 207, 0);
-    color: azure;
-    transform: scale(1.03);
-}
-
-#clear-btn {
-    background-color: #f9f4cc;
-    border: 5px solid #5c6400;
-    font-size: 25px;
-    font-weight: bold;
-    color: #697300;
-}
-
-#clear-btn:hover {
-    background-color: rgb(203, 0, 0);
-    color: azure;
-    transform: scale(1.03);
-}
-
-#speak-btn {
-    color: #697300;
-    font-weight: bold;
-    font-size: 30px;
-    font-family: 'Times New Roman', Times, serif;
-    width: 100%;
-    max-width: 320px;  /* Ensure buttons don't grow too large */
-    margin: 10px 0;
-    padding: 10px;
-    border-radius: 10px;
-    background-color: #dbcb55;
-    border: 5px solid #5c6400;
-    cursor: pointer;
-    text-align: center;
-    transition: transform 0.3s, background-color 0.3s;
-}
-
-#speak-btn:hover {
-    background-color: rgb(151, 133, 0);
-    color: white;
-    transform: scale(1.2);
-}
-
-#save-btn, #print-btn {
-    background-color: #f9f4cc;
-    border: 5px solid #5c6400;
-    font-size: 25px;
-    font-weight: bold;
-    color: #697300;
-}
-
-#save-btn:hover, #print-btn:hover {
-    background-color: #ffaa00;
+#send-btn, #clear-btn, #save-btn, #print-btn, #speak-btn:hover {
     transform: scale(1.03);
 }
 
@@ -188,7 +113,9 @@ h1:hover {
     border-radius: 5px;
 }
 
-/* Responsive design */
+/* Responsive Design */
+
+/* Mobile Styles */
 @media (max-width: 600px) {
     .glass-container {
         width: 95%;
@@ -197,5 +124,36 @@ h1:hover {
 
     #chatbox, #messagebox, #send-btn, #clear-btn, #speak-btn, #save-btn, #print-btn {
         width: 100%;
+        font-size: 1.2em;
+    }
+
+    h1 {
+        font-size: 2em;
+    }
+}
+
+/* Tablet Styles */
+@media (min-width: 601px) and (max-width: 1024px) {
+    .glass-container {
+        max-width: 80%;
+    }
+
+    h1 {
+        font-size: 2.3em;
+    }
+
+    #chatbox, #messagebox {
+        font-size: 1.4em;
+    }
+}
+
+/* Desktop Styles */
+@media (min-width: 1025px) {
+    .glass-container {
+        max-width: 700px;
+    }
+
+    h1 {
+        font-size: 2.5em;
     }
 }
