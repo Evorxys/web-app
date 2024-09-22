@@ -71,6 +71,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // This function updates the "typing" message in the chatbox in real-time
     function updateTypingMessage() {
         const typingMessage = document.getElementById('typing-message');
         const message = messageBox.value.trim();
@@ -90,14 +91,33 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Add event listener to the message box to track typing in real-time
+    // Listen for real-time input changes in the messageBox
     messageBox.addEventListener('input', updateTypingMessage);
 
-    // Event listeners for other buttons
+    // Event listeners for sending messages and managing the chat interface
     sendBtn.addEventListener('click', sendMessage);
     clearBtn.addEventListener('click', clearMessageBox);
-    
-    // Function to save teacher messages
+    saveBtn.addEventListener('click', saveMessages);
+    printBtn.addEventListener('click', printMessages);
+
+    // MutationObserver implementation for the chatbox to detect new messages added by other users
+    const observer = new MutationObserver((mutationList, observer) => {
+        mutationList.forEach(mutation => {
+            if (mutation.addedNodes.length > 0) {
+                mutation.addedNodes.forEach(node => {
+                    if (node.nodeName === 'P') {
+                        console.log('New message detected in chatbox:', node.innerText);
+                        // Perform any additional action when a new message is added to the chatbox
+                    }
+                });
+            }
+        });
+    });
+
+    // Start observing the chatbox for changes (new messages)
+    observer.observe(chatbox, { childList: true });
+
+    // Save chat messages as a text file
     function saveMessages() {
         let teacherMessages = '';
         chatbox.querySelectorAll('p').forEach(message => {
@@ -116,7 +136,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.body.removeChild(a);
     }
 
-    // Function to print messages
+    // Print chat messages
     function printMessages() {
         const newWindow = window.open('', '_blank');
         newWindow.document.write('<html><head><title>Messages</title></head><body>');
@@ -127,25 +147,4 @@ document.addEventListener('DOMContentLoaded', function() {
         newWindow.print();
         newWindow.close();
     }
-
-    // Attach event listeners to save and print buttons
-    saveBtn.addEventListener('click', saveMessages);
-    printBtn.addEventListener('click', printMessages);
-
-    // MutationObserver for monitoring new messages added to the chatbox
-    const observer = new MutationObserver((mutationList) => {
-        mutationList.forEach(mutation => {
-            if (mutation.addedNodes.length > 0) {
-                mutation.addedNodes.forEach(node => {
-                    if (node.nodeName === 'P') {
-                        console.log('New message detected in chatbox:', node.innerText);
-                        // You can handle further actions when new messages are added
-                    }
-                });
-            }
-        });
-    });
-
-    // Start observing the chatbox for changes
-    observer.observe(chatbox, { childList: true });
 });
