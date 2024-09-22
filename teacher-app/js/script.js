@@ -193,4 +193,22 @@ document.addEventListener('DOMContentLoaded', function() {
     speakBtn.addEventListener('click', toggleSpeechRecognition);
     saveBtn.addEventListener('click', saveMessages);
     printBtn.addEventListener('click', printMessages);
+
+    // MutationObserver implementation for the chatbox
+    const observer = new MutationObserver((mutationList, observer) => {
+        mutationList.forEach(mutation => {
+            if (mutation.addedNodes.length > 0) {
+                mutation.addedNodes.forEach(node => {
+                    if (node.nodeName === 'P') {
+                        console.log('New message detected in chatbox:', node.innerText);
+                        // Perform any additional action when a new message is added to the chatbox
+                    }
+                });
+            }
+        });
+    });
+
+    // Start observing the chatbox for changes (new messages)
+    observer.observe(chatbox, { childList: true });
+
 });
