@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let recognizing = false;
     let interimSpeech = '';  // Interim recognized speech
     let finalSpeech = '';    // Final recognized speech
+    let debounceTimer = null; // Timer for debouncing the interim updates
 
     // Function to send a message
     function sendMessage() {
@@ -92,8 +93,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
 
-            // Display real-time speech in chatbox
-            displayRealTimeMessage(finalSpeech + interimSpeech);
+            // Debounce updating the chatbox to avoid duplicate speech display on mobile
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                // Display real-time speech in chatbox
+                displayRealTimeMessage(finalSpeech + interimSpeech);
+            }, 500); // 500ms delay to debounce updates
         };
 
         recognition.onerror = function(event) {
