@@ -189,7 +189,7 @@ h1:hover {
     font-size: 30px;
     font-family: 'Times New Roman', Times, serif;
     width: 100%;
-    max-width: 320px;  /* Ensure buttons don't grow too large */
+    max-width: 40%;  /* Ensure buttons don't grow too large */
     margin: 10px 0;
     padding: 10px;
     border-radius: 10px;
