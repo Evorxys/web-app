@@ -186,7 +186,7 @@ h1:hover {
 
 #speak-btn {
     font-weight: bold;
-    font-size: 30px;
+    font-size: 100%;
     font-family: 'Times New Roman', Times, serif;
     width: 100%;
     max-width: 40%;  /* Ensure buttons don't grow too large */
