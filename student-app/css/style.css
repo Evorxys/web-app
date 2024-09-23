@@ -23,8 +23,8 @@ body {
     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
     border-radius: 10px;
     padding: 20px;
-    width: 90%; /* Adjust width for smaller screens */
-    max-width: 700px; /* Limit max size */
+    width: 90%;
+    max-width: 700px;
     z-index: 2;
     display: flex;
     flex-direction: column;
@@ -32,7 +32,7 @@ body {
     text-align: center;
 }
 
-/* Title styling with backdrop filter for visibility */
+/* Title styling */
 h1 {
     color: #003334;
     font-family: 'Times New Roman', Times, serif;
@@ -54,23 +54,42 @@ h1:hover {
 /* Camera panel styling */
 .camera-panel {
     margin-bottom: 20px;
+    position: relative;
 }
 
 #cameraFeed {
     width: 100%;
     max-width: 500px;
-    height: 200px; /* Adjusted height for better layout */
+    height: 200px;
     border-radius: 10px;
-    display: none; /* Initially hidden */
+    display: none;
 }
 
 /* Static image overlay when camera is off */
 .static-image {
     width: 100%;
     max-width: 500px;
-    height: 200px; /* Match camera height */
+    height: 200px;
     border-radius: 10px;
-    display: block; /* Initially shown */
+    display: block;
+}
+
+/* Add glowing edges when camera is active */
+.camera-glow {
+    box-shadow: 0 0 20px 5px rgba(255, 215, 0, 0.7);
+    animation: rotateLight 2s infinite linear;
+}
+
+@keyframes rotateLight {
+    0% {
+        box-shadow: 0 0 20px 5px rgba(255, 215, 0, 0.7);
+    }
+    50% {
+        box-shadow: 0 0 30px 10px rgba(255, 215, 0, 0.9);
+    }
+    100% {
+        box-shadow: 0 0 20px 5px rgba(255, 215, 0, 0.7);
+    }
 }
 
 /* Message Box */
@@ -93,7 +112,7 @@ h1:hover {
     border: 2px solid #5c6400;
     border-radius: 5px;
     background-color: #f9f4cc;
-    word-wrap: break-word; /* Enable text wrap for long messages */
+    word-wrap: break-word;
     transition: transform 0.3s;
 }
 
@@ -103,7 +122,7 @@ h1:hover {
     font-size: 1rem;
     cursor: pointer;
     background-color: #697300;
-    border: 2px solid #003334; /* Contrasting border */
+    border: 2px solid #003334;
     border-radius: 5px;
     transition: all 0.3s, transform 0.3s;
     color: azure;
@@ -135,25 +154,32 @@ h1:hover {
     padding: 10px;
     border-radius: 10px;
     margin-bottom: 10px;
-    overflow-wrap: break-word; /* Wrap text for long messages */
+    overflow-wrap: break-word;
 }
 
+/* Styles for Student messages */
 #chatbox p.student {
     background-color: #e1f5fe;
-    color: #003334; /* Label color for student */
+    color: black;
+    border-left: 5px solid green;
 }
 
+#chatbox p.student .label {
+    color: green;
+    font-weight: bold;
+}
+
+/* Styles for Teacher messages */
 #chatbox p.teacher {
     background-color: #dcedc8;
-    color: #004d00; /* Label color for teacher */
+    color: black;
+    border-left: 5px solid blue;
     text-align: right;
 }
 
-#chatbox p.teacher::before {
-    content: "Teacher: ";
-    color: green; /* Green label for teacher */
+#chatbox p.teacher .label {
+    color: blue;
     font-weight: bold;
-    text-align: right;
 }
 
 /* Toggle camera button styling */
@@ -168,7 +194,7 @@ h1:hover {
     text-align: center;
     background-color: #dbcb55;
     transition: transform 0.3s, background-color 0.3s;
-    border: 2px solid #003334; /* Contrasting border */
+    border: 2px solid #003334;
 }
 
 #toggleCameraBtn:hover {
