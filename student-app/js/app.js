@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Elements
     const toggleCameraBtn = document.getElementById('toggleCameraBtn');
     const cameraFeed = document.getElementById('cameraFeed');
+    const cameraPanel = document.getElementById('cameraPanel');
     const messageInput = document.getElementById('messageInput');
     const sendMessageBtn = document.getElementById('sendMessageBtn');
     const chatbox = document.getElementById('chatbox');
@@ -33,11 +34,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const gesture = interpretGesture(predictions); // Interpret the detected gesture
             if (gesture) {
                 messageInput.value = gesture; // Display the interpreted gesture
+                highlightMessageInput(); // Add visual feedback for gesture detection
             }
         }
 
-        // Call detectHands on the next animation frame for continuous detection
-        requestAnimationFrame(detectHands);
+        if (cameraOpen) { 
+            requestAnimationFrame(detectHands); // Continue detection while camera is open
+        }
     }
 
     // Interpret gestures based on predictions
@@ -53,13 +56,23 @@ document.addEventListener('DOMContentLoaded', () => {
         return null; // No gesture recognized
     }
 
+    // Add visual feedback by highlighting message input when a gesture is detected
+    function highlightMessageInput() {
+        messageInput.style.border = "2px solid #ffaa00"; // Highlight border
+        setTimeout(() => {
+            messageInput.style.border = "2px solid #5c6400"; // Revert after 1 second
+        }, 1000);
+    }
+
     // Toggle camera and load model only once when camera is opened
     toggleCameraBtn.addEventListener('click', () => {
         if (!cameraOpen) {
             openCamera();  // Open camera
             loadModel();   // Load the HandPose model when the camera opens
+            startCameraGlowEffect(); // Start glow effect
         } else {
             closeCamera(); // Close camera
+            stopCameraGlowEffect(); // Stop glow effect
         }
     });
 
@@ -95,6 +108,15 @@ document.addEventListener('DOMContentLoaded', () => {
         staticImage.style.display = 'block'; // Show static image
     }
 
+    // Add a glowing effect or rotating light animation when the camera is active
+    function startCameraGlowEffect() {
+        cameraPanel.classList.add("camera-glow");
+    }
+
+    function stopCameraGlowEffect() {
+        cameraPanel.classList.remove("camera-glow");
+    }
+
     // Handle sending messages from the message box
     sendMessageBtn.addEventListener('click', () => {
         const message = messageInput.value;
@@ -112,7 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function appendMessage(sender, message) {
         const messageElement = document.createElement('p');
         messageElement.classList.add(sender);
-        messageElement.innerText = `${sender.charAt(0).toUpperCase() + sender.slice(1)}: ${message}`;
+        messageElement.innerHTML = `<span class="label">${sender.charAt(0).toUpperCase() + sender.slice(1)}:</span> <span class="content">${message}</span>`;
         chatbox.appendChild(messageElement);
         chatbox.scrollTop = chatbox.scrollHeight; // Scroll to the bottom of the chatbox
     }
