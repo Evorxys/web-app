@@ -13,25 +13,39 @@ document.addEventListener('DOMContentLoaded', function() {
     let finalSpeech = '';    // Final recognized speech
     let debounceTimer = null; // Timer for debouncing the interim updates
 
-    // Function to send a message
+    // Function to send a message (distinguish teacher messages)
     function sendMessage() {
         const message = messageBox.value.trim();
         
         if (message) {
+            // Create message element
             const newMessage = document.createElement('p');
-            newMessage.classList.add('chat-message');
-            newMessage.innerHTML = `<span style="color:blue;"><strong>Teacher:</strong></span> ${message}`;
+            newMessage.classList.add('teacher');  // Add 'teacher' class for styling
+            newMessage.innerHTML = `<span class="label">Teacher: </span>${message}`;
             chatbox.appendChild(newMessage);
+
             messageBox.value = '';  
             finalSpeech = '';  // Reset final speech after sending
             clearTypingMessage();  // Clear the typing message
             autoScrollChatbox();  // Auto-scroll to the bottom
         }
     }
-    
-    // Auto-scroll chatbox to show the latest message
-    function autoScrollChatbox() {
-        chatbox.scrollTop = chatbox.scrollHeight;
+
+    // Function to receive a message (for demonstration purposes)
+    function receiveMessage(from, message) {
+        const newMessage = document.createElement('p');
+        newMessage.classList.add('chat-message');
+
+        if (from === 'Student') {
+            newMessage.classList.add('student-message');
+            newMessage.innerHTML = `<span style="color:red;"><strong>Student:</strong></span> ${message}`;
+        } else {
+            newMessage.classList.add('teacher-message');
+            newMessage.innerHTML = `<span style="color:blue;"><strong>Teacher:</strong></span> ${message}`;
+        }
+
+        chatbox.appendChild(newMessage);
+        autoScrollChatbox();  // Ensure the chatbox scrolls to the latest message
     }
 
     // Function to clear the message box
@@ -39,6 +53,19 @@ document.addEventListener('DOMContentLoaded', function() {
         messageBox.value = '';
         finalSpeech = ''; // Clear the speech as well
         clearTypingMessage();  // Clear the typing message
+    }
+
+    // Auto-scroll chatbox to show the latest message
+    function autoScrollChatbox() {
+        chatbox.scrollTop = chatbox.scrollHeight;
+    }
+
+    // Function to clear typing message from chatbox
+    function clearTypingMessage() {
+        const typingMessage = document.getElementById('typing-message');
+        if (typingMessage) {
+            chatbox.removeChild(typingMessage);
+        }
     }
 
     // Function to clear typing message from chatbox
@@ -58,11 +85,11 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!typingMessage) {
                 const newTypingMessage = document.createElement('p');
                 newTypingMessage.id = 'typing-message';
-                newTypingMessage.classList.add('chat-message');
-                newTypingMessage.innerHTML = `<span style="color:orange;"><strong>Teacher (Typing):</strong></span> ${message}`;
+                newTypingMessage.classList.add('teacher-typing');  // Updated class for typing messages
+                newTypingMessage.innerHTML = `<span class="label">Teacher (Typing): </span>${message}`;
                 chatbox.appendChild(newTypingMessage);
             } else {
-                typingMessage.innerHTML = `<span style="color:orange;"><strong>Teacher (Typing):</strong></span> ${message}`;
+                typingMessage.innerHTML = `<span class="label">Teacher (Typing): </span>${message}`;
             }
             autoScrollChatbox();  // Auto-scroll to the bottom
         } else {
@@ -138,7 +165,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const realTimeMessageElement = document.createElement('p');
         realTimeMessageElement.id = 'real-time-message';
         realTimeMessageElement.classList.add('chat-message');
-        realTimeMessageElement.innerHTML = `<span style="color:green;"><strong>Teacher (talking):</strong></span> ${text}`;
+        realTimeMessageElement.innerHTML = `<span style="color:green;font-size: 15px"><strong>Teacher (talking):</strong><span style="color:black;font-size: 15px"> ${text}`;
         chatbox.appendChild(realTimeMessageElement);
 
         autoScrollChatbox();  // Auto-scroll to the bottom
