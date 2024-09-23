@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const cameraFeed = document.getElementById('cameraFeed');
     const cameraPanel = document.getElementById('cameraPanel');
     const messageInput = document.getElementById('messageInput');
+    const gestureInput = document.createElement('input'); // Separate field for gesture input
     const sendMessageBtn = document.getElementById('sendMessageBtn');
     const chatbox = document.getElementById('chatbox');
     const staticImage = document.createElement('img');
@@ -14,13 +15,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let cameraOpen = false;
     let stream = null;
-    let model = null;  // Ensure model is initialized only once
+    let model = null;
+    let currentPage = 0;
+    const messagesPerPage = 10;
+
+    // Add the gesture input field below the main message input field
+    gestureInput.type = 'text';
+    gestureInput.placeholder = 'Gesture detected...';
+    gestureInput.disabled = true; // Disable it by default
+    messageInput.parentElement.insertBefore(gestureInput, sendMessageBtn);
 
     // Load the HandPose model
     async function loadModel() {
-        model = await handpose.load();
-        console.log("HandPose model loaded.");
-        detectHands(); // Start detecting once the model is loaded
+        try {
+            model = await handpose.load();
+            console.log("HandPose model loaded.");
+            detectHands(); // Start detecting once the model is loaded
+        } catch (error) {
+            console.error("Error loading HandPose model:", error);
+        }
     }
 
     // Start detecting hand gestures
@@ -33,12 +46,13 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log("Hand detected", predictions);
             const gesture = interpretGesture(predictions); // Interpret the detected gesture
             if (gesture) {
-                messageInput.value = gesture; // Display the interpreted gesture
+                gestureInput.value = gesture; // Display the interpreted gesture in the gesture input field
                 highlightMessageInput(); // Add visual feedback for gesture detection
+                provideGestureFeedback(predictions); // Provide real-time feedback
             }
         }
 
-        if (cameraOpen) { 
+        if (cameraOpen) {
             requestAnimationFrame(detectHands); // Continue detection while camera is open
         }
     }
@@ -58,10 +72,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Add visual feedback by highlighting message input when a gesture is detected
     function highlightMessageInput() {
-        messageInput.style.border = "2px solid #ffaa00"; // Highlight border
+        gestureInput.style.border = "2px solid #ffaa00"; // Highlight border of gesture input
         setTimeout(() => {
-            messageInput.style.border = "2px solid #5c6400"; // Revert after 1 second
+            gestureInput.style.border = "2px solid #5c6400"; // Revert after 1 second
         }, 1000);
+    }
+
+    // Provide real-time visual feedback on gestures
+    function provideGestureFeedback(predictions) {
+        // Highlight or mark detected finger positions in some way (visual feedback implementation)
+        console.log("Providing visual feedback for gesture", predictions);
+        // This could be enhanced by drawing on the video feed to highlight finger points, for example
     }
 
     // Toggle camera and load model only once when camera is opened
@@ -89,7 +110,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     staticImage.style.display = 'none'; // Hide static image
                 })
                 .catch(function (error) {
-                    console.log("Error accessing camera: ", error);
+                    console.error("Error accessing camera:", error);
+                    alert("Unable to access camera. Please check your device or browser permissions.");
                 });
         } else {
             alert("Camera not supported in this browser.");
@@ -119,15 +141,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Handle sending messages from the message box
     sendMessageBtn.addEventListener('click', () => {
-        const message = messageInput.value;
-        if (message.trim() === "") return;
+        const message = messageInput.value.trim();
+        const gestureMessage = gestureInput.value.trim();
+
+        if (message === "" && gestureMessage === "") return;
+
+        // Allow user to confirm and edit the gesture message before sending
+        const finalMessage = message || gestureMessage;
 
         // Send the message to the server using Socket.IO
-        socket.emit('studentMessage', message);
+        socket.emit('studentMessage', finalMessage);
 
         // Add the student's message to the chatbox
-        appendMessage('student', message);
+        appendMessage('student', finalMessage);
         messageInput.value = ""; // Clear message input
+        gestureInput.value = ""; // Clear gesture input
     });
 
     // Append messages to the chatbox
@@ -137,6 +165,21 @@ document.addEventListener('DOMContentLoaded', () => {
         messageElement.innerHTML = `<span class="label">${sender.charAt(0).toUpperCase() + sender.slice(1)}:</span> <span class="content">${message}</span>`;
         chatbox.appendChild(messageElement);
         chatbox.scrollTop = chatbox.scrollHeight; // Scroll to the bottom of the chatbox
+    }
+
+    // Handle chat pagination or load-on-scroll for long conversations
+    chatbox.addEventListener('scroll', () => {
+        if (chatbox.scrollTop === 0 && currentPage > 0) {
+            loadPreviousMessages();
+        }
+    });
+
+    function loadPreviousMessages() {
+        // Simulating pagination by loading older messages
+        currentPage -= 1;
+        console.log(`Loading messages for page ${currentPage}`);
+        // Fetch older messages from the server or local storage based on the current page
+        // Append older messages to the top of the chatbox
     }
 
     // Listen for incoming messages from the teacher
