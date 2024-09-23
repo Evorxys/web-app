@@ -1,4 +1,5 @@
 /* General container styling */
+/* General container styling */
 .container {
     background-image: url("https://static.vecteezy.com/system/resources/previews/011/189/962/original/abstract-wall-decor-design-with-hand-drawn-leaf-pattern-aesthetic-background-free-vector.jpg");
     background-size: cover;
@@ -47,7 +48,7 @@ h1:hover {
     font-family: 'Times New Roman', Times, serif;
     resize: both;
     overflow: auto;
-    min-height: 150px;
+    min-height: 100px;
     min-width: 300px;
     max-width: 100%;
     max-height: 400px;
@@ -66,6 +67,7 @@ h1:hover {
 #chatbox p.teacher .label {
     color: blue;
     font-weight: bold;
+    text-align: right;
 }
 
 /* Styles for Teacher (Typing) messages */
@@ -74,38 +76,47 @@ h1:hover {
     background-color: #fff4a0;
     color: orange;
     border-left: 5px solid orange;
-    padding: 10px;
+    padding: 5px;
     border-radius: 10px;
     margin-bottom: 10px;
-    text-align: right;
-    word-wrap: break-word;
-}
-
-/* Styles for Teacher messages */
-#chatbox p.teacher {
-    font-size: 15px;
-    align-self: flex-end;
-    background-color: #fff4a0;
-    color: rgb(0, 0, 0);
-    border-left: 5px solid orange;
-    padding: 10px;
-    border-radius: 10px;
-    margin-bottom: 1px;
     text-align: right;
     word-wrap: break-word;
     max-width: 80%;
 }
 
+/* Styles for Teacher messages */
+#chatbox p.teacher {
+    font-size: 15px;
+    align-self: flex-end; /* Align teacher messages to the right */
+    background-color: #fff4a0;
+    color: rgb(0, 0, 0);
+    border-left: 5px solid orange;
+    padding: 5px;
+    border-radius: 10px;
+    margin-bottom: 1px; /* Reduce space between messages */
+    text-align: left; /* Ensure the text inside is aligned to the right */
+    word-wrap: break-word;
+    max-width: 80%; /* Keep the message width from stretching across the entire chatbox */
+}
+
 /* Styles for Student messages */
 #chatbox p.student {
-    align-self: flex-start;
+    align-self: flex-start; /* Align student messages to the left */
     background-color: #e0ffe0;
     color: rgb(0, 0, 0);
     border-left: 5px solid darkgreen;
-    padding: 10px;
+    padding: 5px;
     border-radius: 10px;
-    margin-bottom: 2px;
-    text-align: left;
+    margin-bottom: 2px; /* Reduce space between messages */
+    text-align: left; /* Ensure the text inside is aligned to the left */
+    word-wrap: break-word;
+    max-width: 80%; /* Keep the message width from stretching across the entire chatbox */
+}
+
+/* Styles for messages */
+#chatbox p.teacher, #chatbox p.student {
+    margin-bottom: 5px; /* Reduce space between messages */
+    padding: 8px;
     word-wrap: break-word;
     max-width: 80%;
 }
@@ -121,10 +132,12 @@ h1:hover {
 }
 
 #messagebox {
-    font-size: 20px;
-    padding: 10px;
+    font-size: 16px;
+    padding: 10px;    /* Optional: to add padding for better readability */
     font-family: Arial, Helvetica, sans-serif;
     width: 100%;
+    padding: 5px;
+    max-height: fit-content;
     border-radius: 10px;
     background-color: #f9f6e4;
     border: 2px solid #003334;
@@ -137,8 +150,13 @@ h1:hover {
 }
 
 #send-btn, #clear-btn, #save-btn, #print-btn {
+    background-color: #f9f4cc;
+    border: 2px solid #003334;
+    color: #003334;
+    font-size: 25px;
+    font-weight: bold;
     width: 100%;
-    max-width: 180px;
+    max-width: 180px; /* Ensure buttons don't grow too large */
     margin: 10px 0;
     padding: 10px;
     border-radius: 10px;
@@ -149,25 +167,10 @@ h1:hover {
     transition: transform 0.3s, background-color 0.3s;
 }
 
-#send-btn {
-    background-color: #f9f4cc;
-    border: 2px solid #003334;
-    color: #003334;
-    font-size: 25px;
-    font-weight: bold;
-}
-
 #send-btn:hover {
     background-color: rgb(0, 207, 0);
     color: azure;
     transform: scale(1.03);
-}
-
-#clear-btn {
-    background-color: #f9f4cc;
-    border: 2px solid #003334;
-    font-size: 25px;
-    font-weight: bold;
 }
 
 #clear-btn:hover {
@@ -176,12 +179,17 @@ h1:hover {
     transform: scale(1.03);
 }
 
+#save-btn:hover, #print-btn:hover {
+    background-color: #ffaa00;
+    transform: scale(1.03);
+}
+
 #speak-btn {
     font-weight: bold;
     font-size: 30px;
     font-family: 'Times New Roman', Times, serif;
     width: 100%;
-    max-width: 320px;
+    max-width: 320px;  /* Ensure buttons don't grow too large */
     margin: 10px 0;
     padding: 10px;
     border-radius: 10px;
@@ -198,52 +206,24 @@ h1:hover {
     transform: scale(1.2);
 }
 
-#save-btn, #print-btn {
-    background-color: #f9f4cc;
-    border: 2px solid #5c6400;
-    font-size: 25px;
-    font-weight: bold;
-}
-
-#save-btn:hover, #print-btn:hover {
-    background-color: #ffaa00;
-    transform: scale(1.03);
-}
-
-/* Button Row */
-.button-container {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.button-row {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-}
-
-#send-btn, #clear-btn, #save-btn, #print-btn, #speak-btn {
-    width: 45%;
-    font-size: 18px;
-}
-
-#speak-btn {
-    width: 100%;
+/* Chat message styling */
+.chat-message {
+    background-color: #fff4a0;
+    margin: 5px;
+    padding: 5px;
+    text-align: left;
+    word-wrap: break-word;
+    border-radius: 5px;
 }
 
 /* Responsive design */
 @media (max-width: 600px) {
     .glass-container {
         width: 95%;
+        padding: 10px;
     }
 
     #chatbox, #messagebox, #send-btn, #clear-btn, #speak-btn, #save-btn, #print-btn {
         width: 100%;
-    }
-
-    #send-btn, #clear-btn, #save-btn, #print-btn, #speak-btn {
-        width: 100%;
-        font-size: 16px;
     }
 }
