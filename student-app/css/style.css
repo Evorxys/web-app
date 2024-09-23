@@ -133,6 +133,20 @@ h1:hover {
     transform: scale(1.05);
 }
 
+/* Gesture Input Field Styling */
+#gestureInput {
+    width: 70%;
+    padding: 10px;
+    margin-top: 10px;
+    font-size: 1rem;
+    border: 2px solid #ffaa00;
+    border-radius: 5px;
+    background-color: #fef5e7;
+    word-wrap: break-word;
+    transition: border-color 0.3s ease-in-out;
+    color: darkslategray;
+}
+
 /* Chatbox styling with hover scale animation */
 .chatbox {
     border: 2px solid #5c6400;
