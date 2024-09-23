@@ -9,37 +9,34 @@
 </head>
 <body class="container">
     <div class="glass-container">
-        <div>
-            <h1>Teacher Communication Interface</h1>
+        <h1>Teacher Communication Interface</h1>
 
-            <!-- Chatbox -->
-            <div id="chatbox"></div>
+        <!-- Chatbox -->
+        <div id="chatbox"></div>
 
-            <!-- Messagebox and Buttons -->
-            <div id="messagebox-container">
-                <textarea id="messagebox" placeholder="Type your message here"></textarea>
-            </div>
+        <!-- Messagebox and Buttons -->
+        <div id="messagebox-container">
+            <textarea id="messagebox" placeholder="Type your message here"></textarea>
+        </div>
 
-            <div>
-                <!-- Send Button -->
+        <div class="button-container">
+            <!-- Send and Clear Buttons -->
+            <div class="button-row">
                 <button id="send-btn">Send</button>
-                
-                <!-- Clear Messagebox Button -->
                 <button id="clear-btn">Clear</button>
             </div>
 
             <!-- Save and Print Buttons -->
-            <button id="save-btn">Save</button>
-            <button id="print-btn">Print</button>
-
-            <div>
-                <!-- Speak Button -->
-                <button id="speak-btn">Start Speaking</button>
+            <div class="button-row">
+                <button id="save-btn">Save</button>
+                <button id="print-btn">Print</button>
             </div>
+
+            <!-- Speak Button -->
+            <button id="speak-btn">Start Speaking</button>
         </div>
     </div>
 
     <script src="js/script.js"></script>
 </body>
-
 </html>
