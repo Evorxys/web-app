@@ -1,4 +1,5 @@
 /* General container styling */
+/* General container styling */
 .container {
     background-image: url("https://static.vecteezy.com/system/resources/previews/011/189/962/original/abstract-wall-decor-design-with-hand-drawn-leaf-pattern-aesthetic-background-free-vector.jpg");
     background-size: cover;
@@ -49,13 +50,13 @@ h1:hover {
     overflow: auto;
     min-height: 100px;
     min-width: 300px;
-    max-width: 95%;
+    max-width: 100%;
     max-height: 400px;
     margin: 10px 0;
     padding: 10px;
     border-radius: 10px;
     background-color: lightyellow;
-    border: 10px solid #697300;
+    border: 5px solid #697300;
     transition: transform 0.3s;
 }
 
@@ -136,12 +137,12 @@ h1:hover {
     font-family: Arial, Helvetica, sans-serif;
     width: 100%;
     padding: 5px;
+    margin-bottom: 10px;
     max-height: fit-content;
     border-radius: 10px;
     background-color: #f9f6e4;
     border: 2px solid #003334;
     box-sizing: border-box;
-    margin-bottom: 10px;
 }
 
 #messagebox-container:hover {
